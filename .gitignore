@@ -5,6 +5,8 @@ build/
 playwright-report/
 test-results/
 coverage/
+*-debug.log
+ui-debug.log
 .env
 .env.*
 !.env.example

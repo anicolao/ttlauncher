@@ -30,74 +30,49 @@ isolated Firebase emulators.
 - **E2E:** anonymous session, emulator catalogue, radial layout, multi-edge touch,
   drag browsing, direct launch, offline/error states, and multi-touch safety.
 
-## Planned repository layout
+## Repository layout
 
 ```text
 tests/e2e/
   helpers/
     test-step-helper.ts
-    tabletop-touch.ts
-    emulator-admin.ts
-    fixtures.ts
-  001-tabletop-shell/
-    001-tabletop-shell.spec.ts
-    README.md
-    screenshots/chromium-linux/*.png
-  002-anonymous-auth/
-  003-legacy-catalogue-ring/
-  004-omnidirectional-launch/
-  005-swipe-and-pointer-arbitration/
-  006-offline-empty-and-errors/
-  007-multitouch-and-accessibility/
+  tabletop-launcher.spec.ts
+  screenshots/chromium-linux/
+    tabletop-launcher.spec.ts/*.png
+  ../fixtures/applications.mjs
 ```
 
-One numbered directory owns one coherent journey, its generated walkthrough,
-and its baselines. There is no phone project and no game-details journey.
+The current vertical slice has four coherent journeys: fixed-table geometry,
+center paging and wrap, direct launch from four edges plus a corner, and
+drag-without-launch. The scenario inventory below defines the remaining
+hardening work. There is no phone project and no game-details journey.
 
 ## Unified step pattern
 
 ```ts
 const steps = new TestStepHelper(page, testInfo);
-steps.setMetadata(
-  'A player launches from the east edge',
-  'The same radial tile can be read and tapped from the table’s east side.'
-);
 
 await page.goto('/');
 await expect(page.locator('[data-status]')).toHaveAttribute('data-status', 'current');
 
 await steps.step('east-ready', {
-  description: 'The game ring is ready from the east approach',
-  status: 'current',
+  screenshot: 'page-one.png',
   verifications: [
-    {
-      spec: 'Caravan is one large game tile',
-      check: () => expect(page.getByRole('link', { name: 'Launch Caravan' })).toBeVisible()
-    },
-    {
-      spec: 'The east-side tile baseline faces east',
-      check: () => expectTileOrientation(page, 'Caravan', 'east')
-    }
+    () => expect(page.getByRole('button', { name: 'Launch Caravan' })).toBeVisible()
   ]
 });
-
-steps.generateDocs();
 ```
 
 `step()` must:
 
 1. run semantic verifications;
-2. require the expected stable `data-status`;
-3. release all synthetic pointers and move the mouse out of the surface;
-4. wait for bundled fonts and fixture icons to finish decoding;
-5. assert exactly 1920 × 1080 layout with no document scroll or overflow;
-6. assert active tile and handle rectangles meet target/gap constraints;
-7. assert no unrelated active controls overlap;
-8. take a viewport screenshot with animations/caret disabled; and
-9. append exact assertions and image to the scenario walkthrough.
-
-Generated walkthroughs are written on the canonical platform only. CI fails if
-generation changes a tracked walkthrough or baseline without a commit.
+2. require stable `data-status="current"`;
+3. wait for bundled fonts and fixture icons to finish decoding;
+4. assert exactly 1920 × 1080 layout with no document scroll or overflow;
+5. assert every tile meets the target and viewport constraints;
+6. assert tiles do not overlap the center or four handles;
+7. take an optional viewport screenshot with animations disabled; and
+8. attach machine-readable step evidence to the Playwright result.
 
 ## Deterministic environment
 
@@ -167,7 +142,7 @@ Assertions prove:
 - target width/height are at least 120 pixels;
 - unrelated active rectangles are separated by at least 24 pixels;
 - all active rectangles remain inside the installed viewport; and
-- the center dead zone and four handles do not overlap launch tiles.
+- the center page button and four handles do not overlap launch tiles.
 
 Screenshots then review the relationship as a whole.
 
@@ -182,6 +157,9 @@ Every pointer path asserts command count, not just final URL:
 | Down on tile, release outside below/at cancellation rule | Zero launches |
 | Down then `pointercancel` | State resets; zero launches |
 | Drag handle/empty track | Ring moves; zero launches |
+| Tap center with overflow catalogue | Next page of eight; zero launches |
+| Tap center on final page | Wrap to page one; zero launches |
+| Tap inert center with ≤8 games | No state change; zero launches |
 | Two near-simultaneous taps | At most the explicitly selected first launch |
 | Tap while ring is settling | Defined safe behavior; never duplicate launch |
 
@@ -214,7 +192,7 @@ invalid scheme, popup-blocked/error feedback, and exactly-once dispatch.
 | --- | --- | --- |
 | 001 | Tabletop shell | full-screen no-top layout, loading/current, no scroll |
 | 002 | Anonymous auth | invisible first session, reload restore, auth failure perimeter |
-| 003 | Catalogue ring | legacy parsing/order, fallback icon, 8 and overflow catalogues |
+| 003 | Catalogue/paging | legacy parsing/order, fallback icon, pages of 8, final short page, wrap |
 | 004 | Omnidirectional launch | same fixture from N/E/S/W/corner, immediate safe URL |
 | 005 | Swipe/arbitration | handles, empty track, tile drag, thresholds, cancel, settle |
 | 006 | Resilience | cached offline ring, reconnect, empty, permission/error retry |
@@ -247,7 +225,7 @@ fixture build on the real table and record a short manual checklist:
 
 This report is release evidence, not a substitute for automated tests.
 
-## Commands (implementation target)
+## Commands
 
 ```sh
 npm run test:unit
@@ -257,10 +235,10 @@ npm run test:e2e:update-snapshots
 npm run verify:change
 ```
 
-`verify:change` runs formatting, static checks, unit/rules/E2E tests, production
-build, `git diff --check`, and guards against skipped/focused tests, arbitrary
-waits, phone projects, production Firebase identifiers, and relaxed screenshot
-settings. Hooks are never bypassed.
+`verify:change` runs design validation, static checks, unit/rules/E2E tests,
+production build, `git diff --check`, and guards against skipped/focused tests,
+arbitrary waits, phone projects, and relaxed screenshot settings. Hooks are
+never bypassed.
 
 ## Failure triage
 

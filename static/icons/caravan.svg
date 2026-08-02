@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" role="img" aria-label="Caravan">
+  <defs><linearGradient id="g" x2="0" y2="1"><stop stop-color="#ffe45c"/><stop offset="1" stop-color="#ff9d4d"/></linearGradient></defs>
+  <circle cx="80" cy="52" r="34" fill="url(#g)" opacity=".95"/>
+  <path d="M15 98Q46 72 78 94T145 94V120H15Z" fill="#183642"/>
+  <path d="M42 89h33l9 9H35zm19-12 16 12H48zM103 89h22l7 9H97z" fill="#07141d"/>
+  <circle cx="48" cy="100" r="6" fill="#67dbe7"/><circle cx="72" cy="100" r="6" fill="#67dbe7"/>
+</svg>

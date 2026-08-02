@@ -4,31 +4,34 @@ Each increment is a reviewable PR with a runnable tabletop outcome. No increment
 may add personal-device UI, game metadata beyond title/icon/URL, or an
 intermediate post-tap launcher flow.
 
-## Increment 0 — design foundation (this PR)
+## Increment 0 — design foundation and runnable slice (this PR)
 
-Deliver source/auth audit, omnidirectional product/UX architecture, data
-compatibility, radial mockups, E2E contract, rollout plan, validation, and a
-PR-specific design preview.
+Deliver the source/auth audit and design package, then prove the central choices
+with a runnable SvelteKit slice: fixture and Firebase catalogue sources, silent
+anonymous auth, pages of eight, center-logo advance/wrap, ring drag, direct safe
+launch, emulator rules tests, and a build-based PR preview.
 
 Exit criteria:
 
 - no phone, details, setup, profile, preferences, or metadata concept remains;
 - both tabletop mockups and internal links validate;
 - GPLv3 is detected;
-- preview URL works and checks pass.
+- preview URL is interactive and checks pass;
+- unit, rules, and four executable Playwright journeys pass;
+- Linux visual baselines cover the initial and rotated ring.
 
-## Increment 1 — fixed tabletop shell
+## Increment 1 — fixed tabletop shell (delivered in increment 0)
 
 - Scaffold SvelteKit/Svelte 5/TypeScript strict with static adapter.
 - Pin Node, package manager, lockfile, formatting, and checks.
-- Add the 1920 × 1080 full-screen surface, tokens, center dead zone, four edge
+- Add the 1920 × 1080 full-screen surface, tokens, center paging zone, four edge
   status anchors, and fixture data mode.
 - Establish unit/component harness and build-based PR preview.
 
 Exit criteria: fixture surface builds at nested PR path, never document-scrolls,
 has no privileged header/top, and exposes loading/empty/error from all sides.
 
-## Increment 2 — Firebase gateway and silent auth
+## Increment 2 — Firebase gateway and silent auth (delivered in increment 0)
 
 - Validate public config and initialize services exactly once.
 - Connect emulators only through explicit environment configuration.
@@ -42,7 +45,7 @@ in tests; auth failures render equivalent perimeter recovery.
 
 Operational prerequisite: enable anonymous Auth in the existing Firebase project.
 
-## Increment 3 — legacy catalogue adapter
+## Increment 3 — legacy catalogue adapter (adapter delivered; cache/audit remain)
 
 - Implement read-only `Applications` gateway and runtime parser for `Title`,
   `Icon`, and `URL` only.
@@ -53,20 +56,22 @@ Operational prerequisite: enable anonymous Auth in the existing Firebase project
 Exit criteria: same valid catalogue IDs/order, safe invalid URL handling, honest
 offline cache, and no Firestore write path.
 
-## Increment 4 — radial game ring
+## Increment 4 — radial game ring (delivered in increment 0)
 
 - Implement ellipse/ring geometry and outward/four-band title orientation.
-- Render large semantic tile controls, center dead zone, and four edge handles.
-- Support eight-game and overflow fixtures without shrinking targets.
+- Render large semantic tile controls, conditional center page button, four
+  edge handles, and four outward-facing page counters.
+- Split overflow catalogues into stable alphabetical pages of eight without
+  shrinking or repeating targets; wrap center taps after the final page.
 - Add geometry/unit/component coverage and E2E scenario 001.
 
 Exit criteria: target/gap/viewport invariants pass; north/east/south/west/corner
 zones are equivalent; canonical zero-pixel baselines are approved.
 
-## Increment 5 — touch browsing
+## Increment 5 — touch hardening
 
-- Implement Pointer Events, capture/cancel, ring drag, angle wrapping, and
-  restrained deterministic inertia.
+- Extend the delivered Pointer Events/capture/current-page drag with explicit
+  release-outside, pointer-cancel, threshold-boundary, and multi-pointer coverage.
 - Define physical tap/drag threshold and reduced-motion behavior.
 - Add just-below/above threshold, tile-origin drag, handle, empty-track, settle,
   pointer-cancel, and multi-pointer tests in scenarios 005 and 007.
@@ -74,10 +79,9 @@ zones are equivalent; canonical zero-pixel baselines are approved.
 Exit criteria: every drag path produces zero launches, no pointer state sticks,
 and target hardware maintains stable 60 fps.
 
-## Increment 6 — direct safe launch
+## Increment 6 — direct safe launch hardening
 
-- Revalidate `https:` URL on activation.
-- Launch once with opener isolation directly from tile release.
+- Retain the delivered HTTPS revalidation and opener-isolated direct launch.
 - Add pressed state under 50 ms and bounded blocked-launch feedback.
 - Add north/east/south/west/corner journey matrix in scenario 004.
 
@@ -123,7 +127,7 @@ physical four-side checklist is recorded, and rollback is proven.
 | --- | --- |
 | A conventional “top” leaks into UI | Geometry assertions and four-side screenshots |
 | Tap becomes drag or duplicate launch | Pointer reducer plus threshold/exactly-once matrix |
-| Too many games shrink targets | Fixed visible slots and continuous ring rotation |
+| Too many games shrink targets | Stable pages of eight; center tap advances; swipe repositions current page |
 | Rotated titles are hard to read | Physical test continuous radial vs four-band snapping |
 | Multi-touch corrupts ring state | Pointer capture policy and simultaneous-hand tests |
 | Legacy malformed record | Runtime parser, safe omission/fallback |

@@ -1,0 +1,37 @@
+{
+  "name": "ttlauncher",
+  "version": "0.1.0",
+  "private": true,
+  "license": "GPL-3.0-only",
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev --host 127.0.0.1 --port 5192 --strictPort",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1 --port 4192 --strictPort",
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "test:unit": "vitest run",
+    "test:rules": "firebase emulators:exec --project ttlauncher-e2e --only firestore \"vitest run --config vitest.rules.config.ts\"",
+    "test:e2e": "firebase emulators:exec --project ttlauncher-e2e --only auth,firestore \"node scripts/seed-emulator.mjs && playwright test\"",
+    "test:e2e:update-snapshots": "firebase emulators:exec --project ttlauncher-e2e --only auth,firestore \"node scripts/seed-emulator.mjs && playwright test --update-snapshots\"",
+    "validate:design": "node scripts/validate-design-package.mjs",
+    "verify:change": "bash scripts/verify-change.sh"
+  },
+  "dependencies": {
+    "@fontsource/atkinson-hyperlegible": "^5.2.8",
+    "firebase": "^12.16.0"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^5.0.1",
+    "@playwright/test": "^1.61.1",
+    "@sveltejs/adapter-static": "^3.0.10",
+    "@sveltejs/kit": "^2.69.3",
+    "@sveltejs/vite-plugin-svelte": "^7.2.0",
+    "firebase-admin": "^13.6.0",
+    "firebase-tools": "15.25.0",
+    "svelte": "^5.56.5",
+    "svelte-check": "^4.7.2",
+    "typescript": "^5.9.3",
+    "vite": "^8.1.4",
+    "vitest": "^4.1.10"
+  }
+}
