@@ -10,7 +10,7 @@
     "preview": "vite preview --host 127.0.0.1 --port 4192 --strictPort",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "test:unit": "vitest run",
-    "test:rules": "firebase emulators:exec --project ttlauncher-e2e --only firestore \"vitest run --config vitest.rules.config.ts\"",
+    "test:rules": "svelte-kit sync && firebase emulators:exec --project ttlauncher-e2e --only firestore \"vitest run --config vitest.rules.config.ts\"",
     "test:e2e": "firebase emulators:exec --project ttlauncher-e2e --only auth,firestore \"node scripts/seed-emulator.mjs && playwright test\"",
     "test:e2e:update-snapshots": "firebase emulators:exec --project ttlauncher-e2e --only auth,firestore \"node scripts/seed-emulator.mjs && playwright test --update-snapshots\"",
     "validate:design": "node scripts/validate-design-package.mjs",
