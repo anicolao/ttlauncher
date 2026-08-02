@@ -3,164 +3,34 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="color-scheme" content="dark" />
-    <meta
-      name="description"
-      content="Table Top Launcher omnidirectional tabletop UX proposal"
-    />
-    <title>Table Top Launcher — Omnidirectional Design</title>
-    <link rel="stylesheet" href="styles.css" />
+    <meta name="theme-color" content="#07141d" />
+    <link href="/ttlauncher/pr-1/_app/immutable/entry/start.CYm7_x85.js" rel="modulepreload">
+		<link href="/ttlauncher/pr-1/_app/immutable/chunks/lp6jtHUG.js" rel="modulepreload">
+		<link href="/ttlauncher/pr-1/_app/immutable/chunks/y4-PFR04.js" rel="modulepreload">
+		<link href="/ttlauncher/pr-1/_app/immutable/entry/app.Hva-Hfu3.js" rel="modulepreload">
+		<link href="/ttlauncher/pr-1/_app/immutable/chunks/xihTtKlq.js" rel="modulepreload">
+		<link href="/ttlauncher/pr-1/_app/immutable/nodes/0.qmUJ8BA9.js" rel="modulepreload">
+		
   </head>
-  <body>
-    <a class="skip-link" href="#main">Skip to design preview</a>
-    <header class="site-header">
-      <a class="brand" href="#top" aria-label="Table Top Launcher design preview home">
-        <span class="brand-mark" aria-hidden="true">◇</span>
-        <span>Table Top Launcher</span>
-      </a>
-      <span class="mode"><span aria-hidden="true"></span> Design only · fixture</span>
-    </header>
+  <body data-sveltekit-preload-data="hover">
+    <div style="display: contents">
+			<script>
+				{
+					__sveltekit_1dp0u7n = {
+						base: "/ttlauncher/pr-1",
+						assets: "/ttlauncher/pr-1"
+					};
 
-    <main id="main">
-      <section class="hero" id="top">
-        <p class="eyebrow">Omnidirectional tabletop proposal · 2026</p>
-        <h1>A launcher with no head of the table.</h1>
-        <p class="lede">
-          One shared horizontal touch screen. Approach from any edge, recognize
-          a large game icon, and tap once. The selected game owns everything that
-          follows.
-        </p>
-        <nav class="jump-links" aria-label="Preview sections">
-          <a href="#surface">Launcher surface</a>
-          <a href="#context">Table context</a>
-          <a href="#contract">Interaction contract</a>
-          <a href="#decisions">Decisions</a>
-        </nav>
-      </section>
+					const element = document.currentScript.parentElement;
 
-      <section class="principles" aria-label="Product principles">
-        <article>
-          <span>01</span>
-          <h2>Every edge is equal</h2>
-          <p>Radial labels and repeated handles remove a privileged global top.</p>
-        </article>
-        <article>
-          <span>02</span>
-          <h2>One tap launches</h2>
-          <p>No details, setup, confirmation, profile, or launcher-owned next step.</p>
-        </article>
-        <article>
-          <span>03</span>
-          <h2>Only real data</h2>
-          <p>Each tile contains exactly the existing title and icon; URL is its action.</p>
-        </article>
-      </section>
-
-      <section class="screen" id="surface" aria-labelledby="surface-title">
-        <div class="section-copy">
-          <p class="eyebrow">01 · The installed surface</p>
-          <h2 id="surface-title">A game ring anyone can reach.</h2>
-          <p>
-            Large semantic tiles face outward around one rotatable ring. Four
-            equal edge handles and a center dead zone support browsing without
-            turning any side into the front.
-          </p>
-        </div>
-        <a
-          href="mockups/omnidirectional-launcher.png"
-          aria-label="Open the omnidirectional launcher mockup at full size"
-        >
-          <img
-            src="mockups/omnidirectional-launcher.png"
-            alt="Top-down tabletop launcher with eight fictional game icon and title tiles arranged radially around a neutral center"
-            width="1672"
-            height="941"
-          />
-        </a>
-      </section>
-
-      <section class="context-section" id="context" aria-labelledby="context-title">
-        <div class="section-copy">
-          <p class="eyebrow">02 · The physical context</p>
-          <h2 id="context-title">Designed for people around a table.</h2>
-          <p>
-            The product is not a phone or desktop site. Its acceptance context is
-            a landscape display embedded flat in a table, with participants
-            reaching from north, east, south, west, and corners.
-          </p>
-          <ul>
-            <li>At least 120 × 120 CSS-pixel game targets</li>
-            <li>Outward-facing title orientation</li>
-            <li>Standing, seated, glare, parallax, and multi-hand review</li>
-          </ul>
-        </div>
-        <a
-          href="mockups/tabletop-in-context.png"
-          aria-label="Open the tabletop context mockup at full size"
-        >
-          <img
-            src="mockups/tabletop-in-context.png"
-            alt="Large launcher display embedded in a wooden table with people approaching and touching it from all four sides"
-            width="1536"
-            height="1024"
-            loading="lazy"
-          />
-        </a>
-      </section>
-
-      <section class="contract" id="contract" aria-labelledby="contract-title">
-        <p class="eyebrow">03 · Interaction contract</p>
-        <h2 id="contract-title">Touch means exactly one thing.</h2>
-        <ol>
-          <li><strong>Find:</strong> recognize a title/icon tile near your edge.</li>
-          <li><strong>Browse:</strong> drag the ring; crossing the movement threshold cancels launch.</li>
-          <li><strong>Tap:</strong> stationary press/release shows feedback and opens the URL once.</li>
-          <li><strong>Hand off:</strong> the launched game owns orientation, players, and setup.</li>
-        </ol>
-      </section>
-
-      <section class="decisions" id="decisions" aria-labelledby="decisions-title">
-        <p class="eyebrow">Engineering decisions</p>
-        <h2 id="decisions-title">A strict launcher boundary.</h2>
-        <dl>
-          <div>
-            <dt>Device</dt>
-            <dd>Fixed 16:9 horizontal table display; no phone or desktop layout.</dd>
-          </div>
-          <div>
-            <dt>Authentication</dt>
-            <dd>Silent anonymous Firebase session; no account UI.</dd>
-          </div>
-          <div>
-            <dt>Database</dt>
-            <dd>Same read-only Applications records: Title, Icon, URL.</dd>
-          </div>
-          <div>
-            <dt>Interface</dt>
-            <dd>Semantic DOM/CSS radial ring with Pointer Events.</dd>
-          </div>
-          <div>
-            <dt>Testing</dt>
-            <dd>1920×1080 emulator E2E from N/E/S/W/corner; zero-pixel Linux baselines.</dd>
-          </div>
-          <div>
-            <dt>After tap</dt>
-            <dd>No launcher screen remains; the selected URL owns the experience.</dd>
-          </div>
-        </dl>
-      </section>
-
-      <aside class="note" aria-label="Mockup disclaimer">
-        <strong>Reference, not implementation.</strong>
-        These AI-generated mockups establish the radial relationship and physical
-        context. Production uses real Firestore titles/icons, semantic controls,
-        measured touch geometry, and tested pointer behavior.
-      </aside>
-    </main>
-
-    <footer>
-      <span>Table Top Launcher · GPL-3.0</span>
-      <a href="https://github.com/anicolao/ttlauncher">Repository</a>
-    </footer>
+					Promise.all([
+						import("/ttlauncher/pr-1/_app/immutable/entry/start.CYm7_x85.js"),
+						import("/ttlauncher/pr-1/_app/immutable/entry/app.Hva-Hfu3.js")
+					]).then(([kit, app]) => {
+						kit.start(app, element);
+					});
+				}
+			</script>
+		</div>
   </body>
 </html>
