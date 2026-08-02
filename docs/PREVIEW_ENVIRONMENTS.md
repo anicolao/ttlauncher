@@ -12,13 +12,14 @@ The workflow validates the package, publishes a PR-specific directory on
 `gh-pages`, and updates one bot comment. Concurrent pushes to the same PR cancel
 the older deployment.
 
-This design PR previews the omnidirectional mockups and interaction contract. It
-does not impersonate a working launcher or connect to Firebase.
+This PR previews the runnable omnidirectional launcher with 18 bundled fixture
+games. Reviewers can rotate the current ring, tap the center through three pages,
+and exercise direct launch into a bundled fixture-game handoff without connecting
+to Firebase.
 
 ## Application preview modes
 
-Once the Svelte app exists, preview builds declare a mode in four small
-edge-facing build labels or a service-only diagnostics overlay:
+Preview builds declare a mode in four small edge-facing labels:
 
 | Mode | Source | Auth | Writes | Use |
 | --- | --- | --- | --- | --- |
@@ -64,9 +65,11 @@ Pages branch.
 
 ## Preview acceptance
 
-- Bot URL and both tabletop mockup assets return HTTP 200.
+- Bot URL, application assets, and nested static icons return HTTP 200.
 - Relative assets work at nested `/pr-N/` paths.
-- The page visibly states design-only or fixture mode.
+- The page visibly states fixture mode from all four edges.
+- Center-logo taps advance pages `1 / 3`, `2 / 3`, `3 / 3`, then wrap.
+- Ring drags move the current page and do not launch a game.
 - Same-PR updates preserve other preview directories.
 - Failed validation never deploys.
 

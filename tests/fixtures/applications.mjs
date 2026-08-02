@@ -1,0 +1,20 @@
+export const applications = [
+  ['aurora-lines', 'Aurora Lines', 'stars'],
+  ['brass-and-bloom', 'Brass & Bloom', 'mosaic'],
+  ['caravan', 'Caravan', 'caravan'],
+  ['clockwork-cove', 'Clockwork Cove', 'hearth'],
+  ['dice-and-daggers', 'Dice & Daggers', 'daggers'],
+  ['ember-isles', 'Ember Isles', 'caravan'],
+  ['forest-light', 'Forest Light', 'forest'],
+  ['garden-guilds', 'Garden Guilds', 'forest'],
+  ['hearthland', 'Hearthland', 'hearth'],
+  ['lantern-market', 'Lantern Market', 'mosaic'],
+  ['moonlit-maps', 'Moonlit Maps', 'stars'],
+  ['mosaic', 'Mosaic', 'mosaic'],
+  ['paper-kingdoms', 'Paper Kingdoms', 'daggers'],
+  ['river-stones', 'River Stones', 'tides'],
+  ['songbirds', 'Songbirds', 'songbird'],
+  ['star-charts', 'Star Charts', 'stars'],
+  ['tidelines', 'Tidelines', 'tides'],
+  ['winter-roost', 'Winter Roost', 'songbird']
+];

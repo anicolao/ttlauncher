@@ -33,21 +33,17 @@ Only the gateway imports Firebase. Only the catalogue adapter knows
 `Applications`, `Title`, `URL`, and `Icon`. Only the launch policy may turn a
 validated URL into navigation.
 
-## Proposed source layout
+## Implemented source layout
 
 ```text
 src/
   lib/
-    application/       # launcher state and commands
-    domain/            # GameTile, parsing, ring geometry, launch policy
-    firebase/          # config, anonymous session, catalogue gateway
-    components/        # RadialRing, GameTile, EdgeStatus, Empty/ErrorSurface
-    styles/            # tokens, tabletop geometry, focus/forced-colours
+    data/               # fixture and Firebase catalogue sources
+    domain/             # GameTile parsing, paging, and ring geometry
   routes/
-    +layout.svelte     # app-lifetime services
-    +page.svelte       # the only product surface
+    +layout.ts          # static application boundary
+    +page.svelte       # the only product surface and pointer controller
 tests/
-  unit/
   rules/
   e2e/
 ```
@@ -58,7 +54,7 @@ There is no detail, profile, settings, or sign-in route.
 
 - `session`: booting, ready, error
 - `catalogue`: idle, loading, current, stale-cache, empty, error
-- `ring`: angle, drag-idle/dragging/settling, visible tile range
+- `ring`: page index, angle, drag-idle/dragging/settling
 - `connectivity`: online, offline, reconnecting
 - `launch`: idle, pressed, opening, blocked
 
@@ -74,7 +70,7 @@ is rotated so its baseline faces outward:
 ```text
 x = centerX + radiusX × cos(θ)
 y = centerY + radiusY × sin(θ)
-rotation = θ + 90°
+rotation = 90° - θ
 ```
 
 Because the display is rectangular, `radiusX` and `radiusY` form an ellipse in
@@ -82,8 +78,11 @@ screen space while preserving perceptual reach. Tile orientation may snap into
 four edge bands if continuous radial text harms legibility; that decision is
 validated with physical-device tests, not assumed from a desktop monitor.
 
-The center is a non-launching interaction zone. Equivalent edge handles appear
-at north, east, south, and west. There is no global header or top-origin panel.
+The center logo is a paging button only when `ceil(gameCount / 8) > 1`.
+Activating it advances `(pageIndex + 1) % pageCount`, resets the presentation
+angle to its deterministic page-entry value, and never launches a URL. Four
+outward-facing page counters surround it. Equivalent drag handles appear at
+north, east, south, and west. There is no global header or top-origin panel.
 
 ## Pointer arbitration
 
@@ -108,10 +107,12 @@ Reduced motion removes inertial settling; direct drag remains available.
 2. Gateway may expose a compatible cached catalogue, marked stale/offline.
 3. Gateway subscribes to ordered `Applications`.
 4. Adapter emits valid `GameTile` values and bounded diagnostics.
-5. Geometry lays them around the ring; overflow is reachable by rotation.
-6. A stationary tile tap revalidates its `https:` URL and opens it with
+5. The catalogue is split into stable pages of eight; geometry lays the current
+   page around the ring.
+6. Swiping repositions only the current page; center activation loads the next.
+7. A stationary tile tap revalidates its `https:` URL and opens it with
    `noopener,noreferrer`.
-7. The target game owns every subsequent screen and interaction.
+8. The target game owns every subsequent screen and interaction.
 
 There is no intermediate route, modal, confirmation, setup, or launch button.
 The pressed outline is transient touch feedback, not a second step.

@@ -1,4 +1,4 @@
-name: Design package
+name: Application quality
 
 on:
   pull_request:
@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 jobs:
-  validate:
+  static:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -21,7 +21,59 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
       - name: Validate design package
         run: node scripts/validate-design-package.mjs
       - name: Check whitespace errors
         run: git diff --check HEAD^ HEAD
+      - name: Check application
+        run: npm run check
+      - name: Run unit tests
+        run: npm run test:unit
+      - name: Build fixture application
+        env:
+          PUBLIC_DATA_MODE: fixture
+        run: npm run build
+
+  firebase-rules:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - run: npm ci
+      - run: npm run test:rules
+
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - name: Upload failure evidence
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-failure-evidence
+          path: |
+            test-results/
+            playwright-report/

@@ -28,6 +28,8 @@ These rules apply to every change in this repository.
   implementation floor is 120 × 120 CSS pixels at the reference viewport.
 - Separate tap from drag with a movement threshold. A swipe rotates/browses the
   ring; a stationary tap launches the touched tile once.
+- More than eight games are split into alphabetical pages of eight. Tapping the
+  center logo advances and wraps pages; swiping only repositions the current page.
 - The entire launcher fits the installed 16:9 display without document scroll.
 - Honour reduced motion and forced colours. Provide keyboard/service access as
   a fallback, but do not use conventional desktop layout as the visual model.

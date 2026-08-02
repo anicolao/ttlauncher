@@ -6,9 +6,10 @@ door for a shared tabletop game library. It will keep the existing Firebase
 project and `Applications` data while replacing the client, authentication
 flow, visual system, and test discipline.
 
-This first pull request is intentionally design-only. It establishes the
-decisions, compatibility boundaries, delivery plan, E2E contract, and visual
-direction that implementation PRs must follow.
+The first pull request now includes the design foundation and a runnable vertical
+slice: silent anonymous Firebase access, the legacy catalogue adapter, the
+omnidirectional game ring, center-logo paging, direct launch, and emulator-backed
+Playwright evidence.
 
 ## Start here
 
@@ -25,21 +26,25 @@ direction that implementation PRs must follow.
 | [Implementation plan](docs/IMPLEMENTATION_PLAN.md) | Sequenced PRs and their exit criteria |
 | [Decision records](docs/adr/README.md) | Durable architecture decisions |
 
-## Design preview
+## Interactive preview
 
-Every same-repository pull request deploys `preview/` to a PR-specific GitHub
-Pages path and posts the link on the PR. The preview for PR 1 is expected at:
+Every same-repository pull request builds the launcher in fixture mode at a
+PR-specific GitHub Pages path and posts the link on the PR. PR 1 is available at:
 
 <https://anicolao.github.io/ttlauncher/pr-1/>
 
-Validate this design package locally with:
+Run the local checks with:
 
 ```sh
-node scripts/validate-design-package.mjs
+npm run check
+npm run test:unit
+npm run test:rules
+npm run test:e2e
 ```
 
 ## Status
 
-- Product code: not started
+- Product code: runnable vertical slice in this PR
 - Backend: reuse the existing LauncherUI Firebase project
+- Preview data: deterministic local fixture; no production connection
 - License: [GNU GPL version 3](LICENSE)

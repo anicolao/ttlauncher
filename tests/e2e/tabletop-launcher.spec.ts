@@ -1,0 +1,147 @@
+import { expect, test, type Page } from '@playwright/test';
+import { TestStepHelper } from './helpers/test-step-helper';
+
+async function openLauncher(page: Page) {
+  await page.goto('/');
+  const surface = page.locator('[data-e2e-layout]');
+  await expect(surface).toHaveAttribute('data-status', 'current');
+  await page.evaluate(async () => {
+    await document.fonts.ready;
+    await Promise.all([...document.images].map((image) => image.decode()));
+  });
+  return surface;
+}
+
+test('renders one fixed omnidirectional surface with safe geometry', async ({ page }, testInfo) => {
+  const surface = await openLauncher(page);
+  const steps = new TestStepHelper(page, testInfo);
+  await steps.step('page-one-ready', {
+    screenshot: 'page-one.png',
+    verifications: [
+      () => expect(page.locator('[data-game-id]')).toHaveCount(8),
+      () => expect(page.locator('[data-handle]')).toHaveCount(4),
+      () => expect(page.getByRole('button', { name: /Show next games, page 2 of 3/ })).toBeVisible()
+    ]
+  });
+
+  const geometry = await page.locator('[data-game-id]').evaluateAll((tiles) =>
+    tiles.map((tile) => {
+      const rectangle = tile.getBoundingClientRect();
+      return {
+        edge: tile.getAttribute('data-edge'),
+        left: rectangle.left,
+        top: rectangle.top,
+        right: rectangle.right,
+        bottom: rectangle.bottom,
+        width: rectangle.width,
+        height: rectangle.height
+      };
+    })
+  );
+  expect(new Set(geometry.map(({ edge }) => edge))).toEqual(
+    new Set(['north', 'east', 'south', 'west'])
+  );
+  for (const tile of geometry) {
+    expect(tile.width).toBeGreaterThanOrEqual(120);
+    expect(tile.height).toBeGreaterThanOrEqual(120);
+    expect(tile.left).toBeGreaterThanOrEqual(0);
+    expect(tile.top).toBeGreaterThanOrEqual(0);
+    expect(tile.right).toBeLessThanOrEqual(1920);
+    expect(tile.bottom).toBeLessThanOrEqual(1080);
+  }
+  await expect(surface).toHaveAttribute('data-status', 'current');
+});
+
+test('center logo advances pages of eight and wraps without launching', async ({ page }, testInfo) => {
+  await openLauncher(page);
+  const steps = new TestStepHelper(page, testInfo);
+  let popupCount = 0;
+  page.on('popup', () => popupCount++);
+
+  const center = page.getByRole('button', { name: /Show next games/ });
+  await center.click();
+  await expect(page.locator('[data-game-id]')).toHaveCount(8);
+  await expect(page.getByRole('button', { name: 'Launch Hearthland' })).toBeVisible();
+  await expect(center).toHaveAccessibleName('Show next games, page 3 of 3');
+
+  await center.click();
+  await expect(page.locator('[data-game-id]')).toHaveCount(2);
+  await expect(page.getByRole('button', { name: 'Launch Tidelines' })).toBeVisible();
+  await expect(center).toHaveAccessibleName('Show next games, page 1 of 3');
+
+  await center.click();
+  await expect(page.getByRole('button', { name: 'Launch Aurora Lines' })).toBeVisible();
+  expect(popupCount).toBe(0);
+  await steps.step('paging-wrapped', { verifications: [() => expect(popupCount).toBe(0)] });
+});
+
+test('launches directly from north, east, south, west, and a corner', async ({ page, context }, testInfo) => {
+  await context.route('https://games.example.test/**', (route) =>
+    route.fulfill({ status: 200, contentType: 'text/html', body: '<title>Fixture game</title>' })
+  );
+  await openLauncher(page);
+  const steps = new TestStepHelper(page, testInfo);
+
+  const candidates = await page.locator('[data-game-id]').evaluateAll((tiles) =>
+    tiles.map((tile) => ({
+      id: tile.getAttribute('data-game-id')!,
+      edge: tile.getAttribute('data-edge')!,
+      angle: Number(tile.getAttribute('data-angle'))
+    }))
+  );
+  const selected = [
+    candidates.find(({ angle }) => angle === 270)!,
+    candidates.find(({ angle }) => angle === 0)!,
+    candidates.find(({ angle }) => angle === 90)!,
+    candidates.find(({ angle }) => angle === 180)!,
+    candidates.find(({ angle }) => angle === 315)!
+  ];
+  let popupCount = 0;
+  page.on('popup', () => popupCount++);
+
+  for (const candidate of selected) {
+    const popupPromise = page.waitForEvent('popup');
+    await page.locator(`[data-game-id="${candidate.id}"]`).click();
+    const popup = await popupPromise;
+    await expect(popup).toHaveURL(`https://games.example.test/${candidate.id}`);
+    expect(await popup.evaluate(() => window.opener)).toBeNull();
+    await popup.close();
+  }
+  expect(popupCount).toBe(5);
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await steps.step('five-approaches-launched', {
+    verifications: [() => expect(popupCount).toBe(5)]
+  });
+});
+
+test('dragging a tile rotates the current page and never launches it', async ({ page }, testInfo) => {
+  await openLauncher(page);
+  const steps = new TestStepHelper(page, testInfo);
+  const tile = page.getByRole('button', { name: 'Launch Aurora Lines' });
+  const before = await tile.getAttribute('data-angle');
+  const box = await tile.boundingBox();
+  expect(box).not.toBeNull();
+  let popupCount = 0;
+  page.on('popup', () => popupCount++);
+
+  await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(box!.x + box!.width / 2 + 90, box!.y + box!.height / 2 + 45, { steps: 4 });
+  await page.mouse.up();
+
+  await expect(tile).not.toHaveAttribute('data-angle', before!);
+  expect(popupCount).toBe(0);
+
+  const movedBox = await tile.boundingBox();
+  expect(movedBox).not.toBeNull();
+  await page.mouse.move(movedBox!.x + 2, movedBox!.y + movedBox!.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(movedBox!.x - 8, movedBox!.y + movedBox!.height / 2);
+  await page.mouse.up();
+  expect(popupCount).toBe(0);
+
+  await steps.step('ring-rotated', {
+    screenshot: 'rotated-page.png',
+    verifications: [() => expect(popupCount).toBe(0)]
+  });
+});

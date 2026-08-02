@@ -30,7 +30,7 @@ profile, or settings. The game owns the experience after the tap.
 
 The implementation reference is an edge-to-edge radial carousel:
 
-- a quiet center mark anchors the surface without acting as a category or menu;
+- a center logo advances to the next page of games when more than eight exist;
 - large icon/title tiles form a broad ring around it;
 - each tile's baseline points outward, toward the nearest approach position;
 - north, east, south, and west edge handles are equivalent swipe affordances;
@@ -55,9 +55,8 @@ parallax, sleeve/palm rejection, glare, and comfortable reach.
 1. The table wakes into the game ring; auth and catalogue loading are invisible
    infrastructure unless they fail.
 2. A person recognizes an icon/title near their edge.
-3. If necessary, they swipe the ring from a handle, center dead zone, or safe
-   empty track. The ring follows the finger and settles without changing the
-   global orientation model.
+3. If necessary, they swipe a handle or safe empty track to rotate the current
+   eight games toward their edge, or tap the center logo to load the next page.
 4. They touch a game tile. The tile shows a pressed outline within 50 ms.
 5. Releasing without a drag opens the game URL exactly once.
 6. The launcher is gone; the target game is responsible for orientation, players,
@@ -89,26 +88,31 @@ visually repeated at four perimeter anchors, rotated toward each side. One
 hidden/semantic live region owns announcement to avoid repetition for assistive
 technology.
 
-### Brand
+### Brand and paging
 
-The center uses a rotationally neutral mark. If the product name appears there,
-it may be repeated in four orientations or treated as decorative; no required
-instruction depends on reading center copy.
+The center uses a rotationally neutral logo and is the one paging control. When
+more than eight games exist, tapping it advances to the next alphabetical page
+of up to eight and wraps after the final page. A rotationally neutral segmented
+ring and four outward-facing copies of `1 / 3` communicate page position. The
+accessible name is “Show next games, page 2 of 3”. With eight or fewer games the
+logo is inert and is not exposed as a button.
 
 ## Ring behavior
 
 ### Capacity
 
 - For up to eight games, distribute every tile around one complete ring.
-- For more games, keep a fixed set of large visible slots and rotate the ordered
-  catalogue through them. Never shrink targets to fit all records.
-- The ring wraps continuously. Subtle repeated tick marks indicate motion and
-  position without requiring page numbers.
+- For more games, split the alphabetically ordered catalogue into stable pages
+  of eight. Never shrink targets to fit all records.
+- Tapping the center loads the next page and wraps to page one. The last page may
+  contain fewer than eight tiles; it never repeats games merely to fill slots.
+- Swiping rotates only the current page, letting a participant bring a tile
+  closer without silently changing which games are loaded.
 - Title order is stable and alphabetical so a host can learn the shelf.
 
 ### Swipe
 
-- Dragging a handle, empty track, or center dead zone rotates the ring.
+- Dragging a handle or empty track rotates the current page's ring.
 - A drag that begins on a tile cancels its launch intent after the movement
   threshold and becomes a ring drag.
 - Inertia is short and restrained; a tile must be stationary before it can launch.
@@ -126,6 +130,7 @@ instruction depends on reading center copy.
   long press, confirmation, or setup step.
 - A pointer cancel, drag, or release outside the tile does not launch.
 - Once opening begins, further touches are ignored to prevent duplicates.
+- Tapping the center never launches a game; tapping a game never changes page.
 
 ## Visual system
 

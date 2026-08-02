@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" role="img" aria-label="Tidelines">
+  <path d="M8 53q25-25 49 0t49 0 46 0v22q-24-25-48 0T55 75 8 75Z" fill="#67dbe7"/>
+  <path d="M8 79q25-25 49 0t49 0 46 0v22q-24-25-48 0t-49 0-47 0Z" fill="#1d7080"/>
+  <path d="M80 9 54 47h52z" fill="#ffe45c"/><path d="M76 20h8v83h-8z" fill="#f5fbfc"/>
+  <path d="m55 106 25-12 25 12" fill="none" stroke="#ff765f" stroke-width="6" stroke-linecap="round"/>
+</svg>

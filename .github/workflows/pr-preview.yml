@@ -22,8 +22,21 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
       - name: Validate design package
         run: node scripts/validate-design-package.mjs
+      - name: Check application
+        run: npm run check
+      - name: Run unit tests
+        run: npm run test:unit
+      - name: Build fixture preview
+        env:
+          PUBLIC_BASE_PATH: /${{ github.event.repository.name }}/pr-${{ github.event.pull_request.number }}
+          PUBLIC_DATA_MODE: fixture
+          PUBLIC_FIXTURE_ORIGIN: https://${{ github.repository_owner }}.github.io
+        run: npm run build
 
   deploy:
     needs: validate
@@ -43,6 +56,21 @@ jobs:
         with:
           ref: gh-pages
           path: pages-output
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: source/package-lock.json
+      - name: Build interactive fixture preview
+        working-directory: source
+        env:
+          PUBLIC_BASE_PATH: /${{ github.event.repository.name }}/pr-${{ github.event.pull_request.number }}
+          PUBLIC_DATA_MODE: fixture
+          PUBLIC_FIXTURE_ORIGIN: https://${{ github.repository_owner }}.github.io
+        run: |
+          npm ci
+          npm run build
       - name: Assemble static preview
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
@@ -50,9 +78,8 @@ jobs:
           [[ "$PR_NUMBER" =~ ^[0-9]+$ ]]
           cd pages-output
           git rm -r --ignore-unmatch -- "pr-${PR_NUMBER}"
-          mkdir -p "pr-${PR_NUMBER}/mockups"
-          cp ../source/preview/index.html ../source/preview/styles.css "pr-${PR_NUMBER}/"
-          cp ../source/docs/mockups/*.png "pr-${PR_NUMBER}/mockups/"
+          mkdir -p "pr-${PR_NUMBER}"
+          cp -R ../source/build/. "pr-${PR_NUMBER}/"
           printf '%s\n' "User-agent: *" "Disallow: /pr-${PR_NUMBER}/" > "pr-${PR_NUMBER}/robots.txt"
       - name: Publish exact PR directory
         env:
@@ -78,4 +105,4 @@ jobs:
           --repo "$GITHUB_REPOSITORY"
           --edit-last
           --create-if-none
-          --body "Design preview: [$PREVIEW_URL]($PREVIEW_URL) · data mode: fixture · no backend connection"
+          --body "Interactive launcher preview: [$PREVIEW_URL]($PREVIEW_URL) · data mode: fixture · no backend connection"
