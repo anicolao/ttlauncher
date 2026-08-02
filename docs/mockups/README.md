@@ -2,36 +2,45 @@
 
 These PNGs were generated with Codex's built-in image-generation tool on
 2026-08-02 for design review. They are project-bound references committed under
-the repository license. They must not be copied into production UI or treated
-as real catalogue metadata. All depicted game titles and covers are fictional.
+the repository license. All depicted games and icons are fictional.
 
-## `library-desktop.png`
+The first-round personal desktop/detail/mobile mockups were removed after the
+device requirement was corrected. They are not part of the design history in
+this PR because they describe the wrong product.
 
-Generated as a high-fidelity 16:9 desktop library for “Table Top Launcher” with
-an obsidian, parchment, vermilion, mint, and brass palette; a compact brand and
-online/profile header; recent-game hero; search and filters; and a four-card
-library. A targeted edit replaced recognizable commercial games with the
-fictional titles “CARAVAN”, “STAR CHARTS”, “HEARTHLAND”, “SONGBIRDS”, and
-“MOSAIC” while preserving the product hierarchy and generic UI copy.
+## `omnidirectional-launcher.png`
 
-## `game-detail-desktop.png`
+Generated using LauncherUI's `launcher_home_screen.png`,
+`launcher_orbit_selection.png`, and `launcher_library_grid.png` as references for
+shared-table context, orbital selection, and large tactile tiles. The final
+prompt requested a perfectly top-down 16:9 application surface with:
 
-Generated as a high-fidelity 16:9 details and launch screen for the fictional
-game “CARAVAN”, with original desert art, metadata, setup choices, favourite
-action, recent activity, safe primary launch hierarchy, and the same warm visual
-system. The prompt prohibited commercial names, publishers, trademarks, device
-chrome, neon, glassmorphism, and a 3D orbit.
+- no privileged top, header, or reading direction;
+- a neutral center and one broad circular carousel;
+- eight large fictional icon/title tiles facing outward radially;
+- four equivalent edge swipe handles;
+- one pressed highlight that does not open a panel; and
+- only the exact title/icon game contract.
 
-## `library-mobile.png`
+The prompt explicitly prohibited phones, profiles, auth controls, search,
+filters, metadata, details, setup, settings, confirmations, launch buttons,
+keyboards, category suns, commercial games, and 3D planets.
 
-Generated as a high-fidelity 390 × 844-style portrait library with the compact
-brand/status header, “CARAVAN” feature, fictional game cards, and thumb-friendly
-bottom navigation. The prompt required visible labels and implied 44-pixel touch
-targets, while prohibiting commercial games and device mockup hardware.
+## `tabletop-in-context.png`
+
+Generated using the new top-down ring as the interface reference and
+LauncherUI's embedded-table home concept as the physical context reference. The
+final prompt requested a real 16:9 display embedded in a walnut game table, seen
+from high overhead, with people at north/east/south/west and one participant
+directly tapping a highlighted game tile. Every edge had to be an equal approach
+position.
+
+The prompt retained only large title/icon tiles and swipe handles and prohibited
+personal devices, single-user orientation, login/profile, discovery metadata,
+details, setup, configuration, confirmation, and futuristic holograms.
 
 ## Interpretation
 
-The prompts asked for clean exact UI text “where possible”; generated-image text
-is not a correctness mechanism. Implementation copy, spacing, contrast, factual
-metadata, accessible names, and interaction behavior are governed by
-[`../UX_DESIGN.md`](../UX_DESIGN.md) and tested in live markup.
+Generated-image text is not a correctness mechanism. Production geometry,
+titles, icons, contrast, pointer behavior, accessible names, and launch behavior
+are governed by [`../UX_DESIGN.md`](../UX_DESIGN.md) and tested in live markup.

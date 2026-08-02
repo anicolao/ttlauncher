@@ -4,140 +4,145 @@
 
 - SvelteKit 2 with Svelte 5 and TypeScript strict mode
 - Static adapter; client-side Firebase Auth and Firestore
-- Firebase modular web SDK with Auth/Firestore emulators
-- Semantic HTML and CSS custom properties; no required canvas/WebGL layer
-- Vitest for pure modules/components, Firebase Rules Unit Testing for rules,
-  and Playwright for user journeys and visual baselines
-- npm with a committed lockfile and pinned CI Node version
-
-Exact package versions are selected in the scaffold PR, then updated by normal
-dependency PRs. The architecture does not depend on importing code from either
-source repository.
+- Firebase modular SDK with Auth/Firestore emulators
+- Semantic HTML game buttons positioned with CSS transforms
+- Pointer Events for touch arbitration; no required canvas/WebGL hit layer
+- Vitest for pure modules/components, Firebase Rules Unit Testing for rules, and
+  Playwright for touch journeys and canonical visual baselines
+- npm with committed lockfile and pinned CI Node version
 
 ## Runtime boundaries
 
 ```text
-Svelte routes/components
-        │ typed view models and commands
+radial tabletop surface
+        │ GameTile view models + pointer commands
         ▼
-application stores ─── auth session / catalogue / preferences / connectivity
+launcher state ─────── auth / catalogue / ring angle / connection / launch
         │
         ▼
-domain adapters ────── validate legacy records, URLs, and preference schemas
+domain adapters ───── validate legacy records, URL policy, radial geometry
         │
         ▼
-Firebase gateway ───── Auth + Firestore SDK, emulator wiring, subscriptions
+Firebase gateway ──── anonymous Auth + read-only Applications subscription
         │
         ▼
 existing LauncherUI Firebase project
 ```
 
-Only the gateway imports Firebase SDK modules. Only the catalogue adapter knows
-the legacy names `Applications`, `Title`, `URL`, and `Icon`. This makes the
-same-database promise testable and stops legacy casing from spreading through
-the UI.
+Only the gateway imports Firebase. Only the catalogue adapter knows
+`Applications`, `Title`, `URL`, and `Icon`. Only the launch policy may turn a
+validated URL into navigation.
 
 ## Proposed source layout
 
 ```text
 src/
   lib/
-    application/       # state orchestration and commands
-    domain/            # GameSummary, parsers, filtering, launch policy
-    firebase/          # config, auth session, catalogue/preferences gateways
-    components/        # semantic presentational components
-    styles/            # tokens, reset, focus, responsive layout
+    application/       # launcher state and commands
+    domain/            # GameTile, parsing, ring geometry, launch policy
+    firebase/          # config, anonymous session, catalogue gateway
+    components/        # RadialRing, GameTile, EdgeStatus, Empty/ErrorSurface
+    styles/            # tokens, tabletop geometry, focus/forced-colours
   routes/
-    +layout.svelte     # one app-lifetime session and connectivity boundary
-    +page.svelte       # library
-    games/[id]/        # details and setup
-    profile/           # account upgrade and preferences
+    +layout.svelte     # app-lifetime services
+    +page.svelte       # the only product surface
 tests/
   unit/
   rules/
   e2e/
 ```
 
-The game detail route is deep-linkable. The static build supplies fallback
-rewrites so direct navigation works on hosting.
+There is no detail, profile, settings, or sign-in route.
 
-## Application state
+## State model
 
-Independent state machines avoid a single boolean “loading” state:
-
-- `session`: booting, ready-anonymous, ready-identified, error
+- `session`: booting, ready, error
 - `catalogue`: idle, loading, current, stale-cache, empty, error
-- `preferences`: loading, ready, saving, error
+- `ring`: angle, drag-idle/dragging/settling, visible tile range
 - `connectivity`: online, offline, reconnecting
-- `launch`: idle, validating, opening, blocked
+- `launch`: idle, pressed, opening, blocked
 
-Derived view models join catalogue and preferences. Firestore snapshots remain
-immutable inputs; UI filters do not mutate gateway data.
+Game data never gains presentation-only metadata. Radial position and rotation
+are derived from sorted tile index, ring angle, tile count, and viewport.
 
-## Catalogue flow
+## Omnidirectional geometry
 
-1. Root starts and restores/creates an authenticated session.
-2. Catalogue gateway may expose a version-compatible cached snapshot.
-3. Gateway subscribes to the existing ordered `Applications` query.
-4. Adapter validates every document and emits valid games plus diagnostics.
-5. Store reconciles favourites/recent IDs, tolerating removed games.
-6. UI renders current, stale, empty, or actionable error state.
-7. Unsubscribe occurs exactly once at app teardown or session replacement.
+The installed display uses a 1920 × 1080 reference coordinate space scaled as
+one unit. The ring is centered at `(960, 540)`. Every tile sits at angle `θ` and
+is rotated so its baseline faces outward:
 
-## Launch flow and safety
+```text
+x = centerX + radiusX × cos(θ)
+y = centerY + radiusY × sin(θ)
+rotation = θ + 90°
+```
 
-A game card is a normal link when its target has passed validation. The launch
-command revalidates the URL at activation and uses a new browsing context with
-`noopener,noreferrer`; it never injects catalogue strings as HTML. Invalid
-records show a disabled launch state with a useful, non-sensitive explanation.
+Because the display is rectangular, `radiusX` and `radiusY` form an ellipse in
+screen space while preserving perceptual reach. Tile orientation may snap into
+four edge bands if continuous radial text harms legibility; that decision is
+validated with physical-device tests, not assumed from a desktop monitor.
 
-Record recent activity only after a trusted click/key activation and successful
-opening attempt. Popup blocking produces a copy/open fallback and does not claim
-success.
+The center is a non-launching interaction zone. Equivalent edge handles appear
+at north, east, south, and west. There is no global header or top-origin panel.
 
-## Rendering strategy
+## Pointer arbitration
 
-The primary UI is DOM/CSS. This is a deliberate change from LauncherUI's
-Threlte orbit:
+Use Pointer Events and pointer capture.
 
-- semantic controls and browser focus behavior work without parallel overlays;
-- layout responds predictably at zoom and narrow widths;
-- canonical visual snapshots do not depend on a GPU/WebGL implementation;
-- reduced motion can remove decorative transitions without changing structure;
-- the library scales beyond a small number of orbiting nodes.
+1. `pointerdown` records pointer ID, start coordinate, target tile if any, time,
+   and current ring angle.
+2. Movement below an implementation-tuned physical threshold retains tap intent.
+3. Movement beyond threshold cancels tap intent and rotates the ring; velocity
+   may produce restrained inertial settling.
+4. `pointerup` on the same valid tile with tap intent launches exactly once.
+5. A second pointer must not cause duplicate launch. The simplest v1 policy is
+   to lock ring movement to the first active pointer while allowing independent
+   stationary tile taps only after explicit multi-touch tests.
+6. `pointercancel` always clears pressed/drag state and never launches.
 
-Motion is limited to transform/opacity transitions under 250 ms. Tests and
-`prefers-reduced-motion` disable it. View transitions are progressive
-enhancement only.
+Reduced motion removes inertial settling; direct drag remains available.
 
-## Resilience and observability
+## Catalogue and launch flow
 
-- User-visible states expose stable `data-status` values for testing and support.
-- Errors map Firebase codes to bounded product messages; raw tokens, document
-  contents, and credentials never enter logs.
-- A build identifier and environment label are available in the profile/support
-  panel, not permanently cluttering the launcher.
-- Catalogue diagnostics report counts and document IDs only in development or
-  authorized administration contexts.
+1. App restores or creates anonymous auth silently.
+2. Gateway may expose a compatible cached catalogue, marked stale/offline.
+3. Gateway subscribes to ordered `Applications`.
+4. Adapter emits valid `GameTile` values and bounded diagnostics.
+5. Geometry lays them around the ring; overflow is reachable by rotation.
+6. A stationary tile tap revalidates its `https:` URL and opens it with
+   `noopener,noreferrer`.
+7. The target game owns every subsequent screen and interaction.
+
+There is no intermediate route, modal, confirmation, setup, or launch button.
+The pressed outline is transient touch feedback, not a second step.
+
+## Rendering decision
+
+The orbit is expressed in DOM/CSS rather than Threlte. Each tile remains a real
+button/link with an accessible name and testable rectangle while transforms
+provide the tactile radial presentation. Decorative canvas is allowed later
+only behind the semantic surface and cannot own hit testing.
+
+## Failure surfaces
+
+Loading, offline, empty, and error messages repeat at four perimeter anchors,
+rotated to face the adjacent edge. Only one semantic live region announces the
+state to avoid duplicate assistive output. Retry controls are duplicated
+visually but dispatch the same idempotent command.
 
 ## Performance budgets
 
-- Initial JS target: 180 KiB gzip excluding the lazy-loaded Firebase chunk;
-  total startup JS target: 350 KiB gzip.
-- No third-party font request; subset/bundle WOFF2 assets.
-- Responsive catalogue images with dimensions, lazy loading below the fold, and
-  a stable aspect ratio.
-- No library-wide WebGL scene or unbounded image preloading.
-- Performance acceptance is measured on the production build, not the Vite dev
-  server.
+- Reference render: stable 60 fps during one-finger ring drag on target hardware.
+- Pointer-to-pressed feedback: under 50 ms.
+- Initial JS: 180 KiB gzip excluding lazy Firebase; startup total 350 KiB gzip.
+- No WebGL scene, unbounded icon preload, or remote font dependency.
+- Icons have fixed dimensions and lazy decode outside the visible range.
 
 ## Deployment shape
 
-- Production: static assets on the existing Firebase Hosting site or an
-  explicitly approved replacement, configured to the existing Firebase project.
-- PR preview: the design-only PR uses GitHub Pages; application PRs use the same
-  URL contract and fixture data by default.
-- E2E: local server plus isolated Auth and Firestore emulators.
+- Production: static client configured for the existing Firebase project.
+- PR preview: fixture catalogue, exact table viewport, no backend by default.
+- Live-read acceptance: authenticated read of the existing project, no writes.
+- E2E: local production build plus isolated Auth and Firestore emulators.
 
-Preview, test, and production data modes are explicit compile-time settings;
-hostname guessing is forbidden.
+Mode is explicit at build time; hostname inference is forbidden.

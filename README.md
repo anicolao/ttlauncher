@@ -17,9 +17,9 @@ direction that implementation PRs must follow.
 | [Product brief](docs/PRODUCT_BRIEF.md) | Audience, outcomes, scope, and success measures |
 | [Source audit](docs/CURRENT_STATE_AUDIT.md) | How LauncherUI works and how Jaipur differs |
 | [Architecture](docs/ARCHITECTURE.md) | Proposed runtime, modules, boundaries, and launch flow |
-| [Authentication](docs/AUTHENTICATION.md) | Anonymous-first auth, account upgrade, and threat model |
+| [Authentication](docs/AUTHENTICATION.md) | Silent anonymous auth for the shared appliance |
 | [Data compatibility](docs/DATA_MODEL_AND_MIGRATION.md) | Exact contract with the existing Firestore database |
-| [UX design](docs/UX_DESIGN.md) | Interaction model, responsive behavior, tokens, and mockups |
+| [UX design](docs/UX_DESIGN.md) | Omnidirectional tabletop interaction, geometry, and mockups |
 | [E2E guide](E2E_GUIDE.md) | Mandatory deterministic Playwright workflow and scenario plan |
 | [PR previews](docs/PREVIEW_ENVIRONMENTS.md) | Preview deployment, data modes, secrets, and teardown |
 | [Implementation plan](docs/IMPLEMENTATION_PLAN.md) | Sequenced PRs and their exit criteria |

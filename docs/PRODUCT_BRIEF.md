@@ -2,79 +2,78 @@
 
 ## Product promise
 
-Table Top Launcher gets a group from “what should we play?” to a running game
-without making anyone manage an account, interpret a technical dashboard, or
-fight a display designed for one device class.
+Table Top Launcher turns a table-sized shared touch display into a game shelf
+that works from every seat: approach, find a large game icon, and tap it. The
+selected game's URL takes over from there.
 
-## Primary users
+## Device and user
 
-- **Host at a shared screen:** curates a library and starts a game for the room.
-- **Player on a phone or tablet:** quickly finds and launches a game from a
-  personal device.
-- **Returning player:** expects preferences and recent games to persist without
-  being forced through sign-in.
-- **Maintainer:** needs deterministic evidence that UI, auth, and legacy data
-  compatibility still work.
+The only supported device is a permanently installed, landscape 16:9 touch
+screen lying flat in a table. People may be standing or seated along any edge or
+corner. The launcher is a shared appliance, not a personal app: it has no phone
+layout, account management, personal history, or preferred viewing direction.
 
-## Jobs to be done
+## Job to be done
 
-1. See the available library and backend state immediately.
-2. Resume a recent game in one action.
-3. Search or filter by title, player count, and duration.
-4. Inspect a game without losing library context.
-5. Launch a validated game URL intentionally and safely.
-6. Optionally attach a Google account to preserve preferences across devices.
-7. Understand and recover from offline, auth, data, and launch failures.
+1. See that the shared table is ready.
+2. Recognize a game from its icon and title from the nearest edge.
+3. Swipe the game ring from any empty area or edge handle when more games exist.
+4. Tap one game tile once.
+5. Leave the launcher as the target game opens. Everything after launch belongs
+   to that game.
 
 ## Principles
 
-- **Play before profile.** Establish an anonymous Firebase session silently.
-- **Calm, not cosmic.** Use the warmth of a well-kept game room, not the former
-  orbit/space metaphor.
-- **Fast at a glance.** Titles, player count, duration, and primary actions form
-  the first scan path.
-- **HTML is the interface.** Motion and art enrich semantic controls; they do not
-  replace them.
-- **Proof travels with the change.** E2E steps generate assertions, screenshots,
-  and review documentation together.
-- **Compatibility beats cleanup.** Adapt the legacy database at the boundary;
-  do not force a production migration into the client rewrite.
+- **No head of the table.** Geometry, labels, and gestures have no global up.
+- **One object, one outcome.** A tile represents one game; tapping it launches.
+- **Only honest data.** Render only the Firestore title and icon. The URL is an
+  action target, not displayed metadata.
+- **Shared and ephemeral.** Silent anonymous Firebase auth satisfies backend
+  rules without introducing identity UI.
+- **Touch first.** Large separated targets tolerate standing reach, parallax,
+  multiple hands, and imperfect taps.
+- **Proof from every side.** E2E repeats entry, drag, and launch assertions for
+  north, east, south, west, and a corner approach.
 
 ## Version-one scope
 
-- Anonymous-first Firebase Auth with optional Google upgrade
-- Read the existing `Applications` collection from the existing database
-- Responsive library, search/filter, game details, favourites, and recent games
-- Safe external launch and explicit failure handling
-- User preferences under the existing `users/{uid}` rule boundary
-- Offline/cached library state with a visible freshness indicator
-- Static SvelteKit deployment, Firebase emulators, unit/rules/E2E tests
-- Per-PR previews with fixture mode by default and a protected live-read mode
+- Silent anonymous Firebase Auth
+- Read-only access to the existing `Applications` collection
+- Runtime validation of legacy `Title`, `Icon`, and `URL` fields
+- One full-screen radial game carousel with outward-facing titles
+- Direct tap-to-launch with a brief pressed state and safe popup/navigation
+- One-finger ring rotation with tap-versus-drag disambiguation
+- Loading, empty, offline-cache, and error states repeated/oriented for all sides
+- Static SvelteKit deployment, Firebase emulators, deterministic E2E, and PR
+  previews at the exact table viewport
 
-## Non-goals
+## Explicit non-goals
 
-- Hosting or embedding individual games
-- Editing the global game catalogue in version one
-- Social graphs, matchmaking, payments, or chat
-- Reusing LauncherUI's Threlte orbit implementation
-- Migrating Jaipur game events into the launcher database
-- Silent production writes from PR previews
+- Phone, tablet-handheld, laptop, or conventional desktop layouts
+- Sign-in, profile, sign-out, Google linking, or user preferences
+- Search, filters, categories, favourites, recents, recommendations, or analytics
+- Game details, description, player count, duration, genre, or cover metadata
+- Player/setup controls, launch confirmation, or settings of any kind
+- Hosting or embedding games; each target URL owns the post-tap experience
+- Migrating or enriching the existing catalogue
 
 ## Success measures
 
-- Warm start to an interactive cached library: under 1 second on a mid-range
-  phone; cold start target under 2.5 seconds on a normal broadband connection.
-- One primary action from library to launch for the recent game.
-- 100% of critical flows covered by semantic assertions and canonical visual
-  baselines.
-- Zero production-data writes from automated tests and default PR previews.
-- No forced sign-in prompt for first-time or returning anonymous players.
-- WCAG 2.2 AA automated checks plus documented keyboard and screen-reader
-  acceptance for each major surface.
+- Every valid game is reachable and launchable from each table edge.
+- The same game can be tapped from north/east/south/west fixtures with identical
+  URL and opener-isolation results.
+- Tile targets are at least 120 × 120 CSS pixels at the reference 1920 × 1080
+  viewport with at least 24 pixels between unrelated active targets.
+- A drag never launches, and a tap launches exactly once.
+- The surface never document-scrolls, clips a game tile, or privileges a top
+  orientation at the installed viewport.
+- 100% of critical states have semantic assertions and canonical zero-pixel
+  screenshots.
+- Automated tests and default previews perform zero production writes.
 
 ## Release acceptance
 
-Version one ships only after the parallel-read comparison against LauncherUI
-shows the same set and order of valid applications, the auth upgrade flow has
-rules tests, and the rollback is a hosting-channel switch rather than a database
-restore.
+Version one ships only after a read-only comparison proves that it exposes the
+same valid `Applications` documents as LauncherUI, the anonymous auth path works
+against the existing project, and the full edge/corner E2E matrix passes. The
+rollback is a hosting release switch; no database restore is involved.

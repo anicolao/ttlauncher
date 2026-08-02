@@ -1,37 +1,34 @@
 # End-to-end testing guide
 
-Playwright E2E tests are executable product specifications. A passing journey
-must prove behavior, layout, and its review evidence against isolated Firebase
-emulators. Visual assertions support semantic assertions; they never replace
-them.
+Playwright E2E tests are executable specifications for a table-sized horizontal
+touch appliance. A passing journey proves anonymous auth, legacy catalogue data,
+radial geometry, touch arbitration, orientation, and safe one-tap launch against
+isolated Firebase emulators.
 
 ## Non-negotiable contract
 
 1. E2E never connects to production or preview Firebase projects.
-2. Tests use the real anonymous-first UI flow. There is no test-only sign-in
-   button, route, or bypass.
-3. Canonical Linux screenshots use `maxDiffPixels: 0`, device scale factor 1,
-   bundled assets, and a pinned Chromium/container version.
-4. Tests are not skipped, quarantined, made order-dependent, or retried.
-5. Arbitrary sleeps (`waitForTimeout`, shell `sleep`) are forbidden.
-6. Every screenshot step uses the shared `TestStepHelper`; test code never
-   chooses counters or screenshot paths manually.
-7. A feature is incomplete until its error, empty, keyboard, and narrow-screen
-   states are covered in proportion to risk.
+2. Tests use the real silent anonymous flow; no test-only sign-in UI exists.
+3. The canonical viewport is the installed table ratio and reference size:
+   1920 × 1080 CSS pixels, device scale factor 1.
+4. Canonical Linux screenshots use `maxDiffPixels: 0`, pinned Chromium, bundled
+   fonts/icons, and a versioned fixture.
+5. Tests are not skipped, quarantined, order-dependent, or retried.
+6. Arbitrary sleeps (`waitForTimeout`, shell `sleep`) are forbidden.
+7. Every screenshot uses `TestStepHelper`; tests never choose counters or paths.
+8. North, east, south, west, and corner touch approaches are required evidence.
+9. Phone or conventional responsive-browser projects must not be added.
 
 ## Test layers
 
-- **Unit:** legacy record parsing, URL policy, filters, preference merge, state
-  reducers, time formatting, and config validation.
-- **Component:** semantic names, keyboard behavior, focus, and error rendering
-  for isolated components.
-- **Rules:** authenticated catalogue read, denied catalogue write,
-  owner-only preferences, schema limits, and cross-user denial.
-- **E2E:** user-visible integration across Svelte, Firebase Auth/Firestore
-  emulators, routing, responsive layout, caching, and external launch intent.
-
-Do not use E2E to exhaustively permute pure filtering logic. Do use it to prove
-that the actual controls and Firestore data join correctly.
+- **Unit:** legacy record parsing, URL policy, alphabetical ordering, radial
+  coordinates/orientation bands, angle wrapping, and tap-versus-drag reducer.
+- **Component:** semantic tile names, pointer capture/cancel, pressed state,
+  repeated edge status, and exact launch command count.
+- **Rules:** authenticated `Applications` reads plus unauthenticated and all-write
+  denial.
+- **E2E:** anonymous session, emulator catalogue, radial layout, multi-edge touch,
+  drag browsing, direct launch, offline/error states, and multi-touch safety.
 
 ## Planned repository layout
 
@@ -39,48 +36,47 @@ that the actual controls and Firestore data join correctly.
 tests/e2e/
   helpers/
     test-step-helper.ts
+    tabletop-touch.ts
     emulator-admin.ts
     fixtures.ts
-  001-app-shell/
-    001-app-shell.spec.ts
+  001-tabletop-shell/
+    001-tabletop-shell.spec.ts
     README.md
     screenshots/chromium-linux/*.png
   002-anonymous-auth/
-  003-library-data/
-  004-find-and-inspect/
-  005-launch-game/
-  006-preferences-and-upgrade/
-  007-offline-and-errors/
-  008-responsive-accessibility/
+  003-legacy-catalogue-ring/
+  004-omnidirectional-launch/
+  005-swipe-and-pointer-arbitration/
+  006-offline-empty-and-errors/
+  007-multitouch-and-accessibility/
 ```
 
 One numbered directory owns one coherent journey, its generated walkthrough,
-and its baselines. Do not create a catch-all spec.
+and its baselines. There is no phone project and no game-details journey.
 
 ## Unified step pattern
-
-The shared helper makes verification, layout checks, screenshot capture, and
-walkthrough generation atomic:
 
 ```ts
 const steps = new TestStepHelper(page, testInfo);
 steps.setMetadata(
-  'Guest opens the library',
-  'A first-time player can reach the catalogue without an account prompt.'
+  'A player launches from the east edge',
+  'The same radial tile can be read and tapped from the table’s east side.'
 );
 
 await page.goto('/');
-await steps.step('library-ready', {
-  description: 'The authenticated guest sees the seeded catalogue',
+await expect(page.locator('[data-status]')).toHaveAttribute('data-status', 'current');
+
+await steps.step('east-ready', {
+  description: 'The game ring is ready from the east approach',
   status: 'current',
   verifications: [
     {
-      spec: 'Library heading is exposed',
-      check: () => expect(page.getByRole('heading', { name: 'Your games' })).toBeVisible()
+      spec: 'Caravan is one large game tile',
+      check: () => expect(page.getByRole('link', { name: 'Launch Caravan' })).toBeVisible()
     },
     {
-      spec: 'Seeded games are links in title order',
-      check: () => expect(page.getByTestId('game-title')).toHaveText(['Caravan', 'Mosaic'])
+      spec: 'The east-side tile baseline faces east',
+      check: () => expectTileOrientation(page, 'Caravan', 'east')
     }
   ]
 });
@@ -92,113 +88,164 @@ steps.generateDocs();
 
 1. run semantic verifications;
 2. require the expected stable `data-status`;
-3. move the pointer away and hide the caret;
-4. assert no unintended document scroll/overflow for no-scroll viewports;
-5. assert visible controls do not overlap or leave the viewport;
-6. run optional automated accessibility checks;
-7. take the canonical screenshot with animations disabled; and
-8. append the exact assertions and relative image to `README.md`.
+3. release all synthetic pointers and move the mouse out of the surface;
+4. wait for bundled fonts and fixture icons to finish decoding;
+5. assert exactly 1920 × 1080 layout with no document scroll or overflow;
+6. assert active tile and handle rectangles meet target/gap constraints;
+7. assert no unrelated active controls overlap;
+8. take a viewport screenshot with animations/caret disabled; and
+9. append exact assertions and image to the scenario walkthrough.
 
-Walkthrough files are generated on the canonical platform only. CI fails if a
-test changes the generated file or screenshot without committing the result.
+Generated walkthroughs are written on the canonical platform only. CI fails if
+generation changes a tracked walkthrough or baseline without a commit.
 
 ## Deterministic environment
-
-Pin all inputs that can change pixels or behavior:
 
 | Input | E2E value |
 | --- | --- |
 | Browser / OS | Pinned Playwright Chromium in versioned Linux container |
-| Viewports | desktop 1280×720; phone 393×852; targeted tablet/landscape |
+| Viewport | 1920 × 1080 only; targeted smaller table resolution is a separate project |
 | DPR | 1 |
 | Locale / timezone | `en-CA` / `America/Toronto` |
-| Clock | fixed per test, advanced explicitly |
-| Motion | reduced; CSS animations/transitions disabled at capture |
-| Fonts | bundled WOFF2, document waits for `document.fonts.ready` |
-| Service workers | blocked unless the scenario explicitly tests them |
+| Clock | Fixed per test and explicitly advanced |
+| Motion | Reduced at capture; inertia controlled by a test clock |
+| Fonts | Bundled WOFF2; wait for `document.fonts.ready` |
+| Icons | Local fictional fixture icons with explicit dimensions |
+| Service workers | Blocked unless an offline-cache scenario owns them |
 | Backend | Auth + Firestore emulators on fixed ports |
-| Catalogue | versioned fixture seeded before the web server starts |
-| Identity | real emulator anonymous users, one per browser context |
-| Network | online unless the scenario explicitly toggles it |
+| Identity | Real emulator anonymous user |
+| Catalogue | Versioned `Applications` seed using only Title/Icon/URL |
+| Network | Online unless a test explicitly toggles it |
 
-Use CSS/DOM production surfaces so screenshots do not depend on WebGL. Remote
-catalogue images are replaced by deterministic local fixture images through
-seed data, not request interception of arbitrary production URLs.
+The primary surface is DOM/CSS, so screenshots do not depend on WebGL. Remote
+production icons are never requested in E2E.
 
-## Emulator lifecycle and isolation
+## Emulator lifecycle
 
-The Playwright `webServer` command runs inside one
+The Playwright web server runs inside one
 `firebase emulators:exec --project ttlauncher-e2e --only auth,firestore` process:
 
-1. start emulators on repository-pinned ports;
+1. start emulators on pinned ports;
 2. clear state;
-3. load a versioned `Applications` fixture and any test user documents;
-4. start the production-like Vite server with explicit emulator env vars;
-5. run tests with one worker unless isolation has been proven; and
-6. tear down the entire process.
+3. seed a deterministic `Applications` fixture;
+4. start the production-like server with explicit emulator variables;
+5. run with one worker until isolation and fixed ports are redesigned; and
+6. tear down the whole process.
 
-Never rely on an emulator already running on a developer machine. A test that
-mutates shared data uses a unique test ID and cleans through the emulator/admin
-API. No test depends on execution order.
+Tests that alter the catalogue do so through the emulator admin helper before a
+page subscribes. No test depends on order or an emulator left running locally.
 
-## External launch testing
+## Coordinate model for edge approaches
 
-Do not navigate to real game sites. Assert the popup contract:
+Touch helpers use normalized table coordinates and an explicit approach label:
+
+```ts
+type Approach = 'north' | 'east' | 'south' | 'west' | 'north-east-corner';
+
+const approachPoints = {
+  north: { x: 0.5, y: 0.04 },
+  east: { x: 0.96, y: 0.5 },
+  south: { x: 0.5, y: 0.96 },
+  west: { x: 0.04, y: 0.5 },
+  'north-east-corner': { x: 0.93, y: 0.07 }
+};
+```
+
+The helper converts normalized positions through the real surface bounding box
+and uses CDP/Playwright touchscreen events with stable pointer IDs. Do not call
+component functions or mutate ring state from tests.
+
+## Omnidirectional geometry assertions
+
+For each visible tile, E2E reads its DOM rectangle and exposed normalized
+rotation value (for example `data-angle`, not a test-only layout override).
+Assertions prove:
+
+- center point lies within the ring band;
+- all four edge zones contain readable/reachable tiles;
+- labels face outward or match the approved four-band orientation;
+- target width/height are at least 120 pixels;
+- unrelated active rectangles are separated by at least 24 pixels;
+- all active rectangles remain inside the installed viewport; and
+- the center dead zone and four handles do not overlap launch tiles.
+
+Screenshots then review the relationship as a whole.
+
+## Tap versus drag
+
+Every pointer path asserts command count, not just final URL:
+
+| Gesture | Expected result |
+| --- | --- |
+| Down/up inside one tile below threshold | Exactly one launch command |
+| Down, cross threshold, up over same tile | Ring moves; zero launches |
+| Down on tile, release outside below/at cancellation rule | Zero launches |
+| Down then `pointercancel` | State resets; zero launches |
+| Drag handle/empty track | Ring moves; zero launches |
+| Two near-simultaneous taps | At most the explicitly selected first launch |
+| Tap while ring is settling | Defined safe behavior; never duplicate launch |
+
+Threshold tests include just-below and just-above distances. The implementation
+uses CSS pixels mapped from a documented physical target-hardware threshold.
+
+## Direct launch testing
+
+There is no details/setup intermediate surface. A tile tap must emit a popup or
+navigation immediately:
 
 ```ts
 const [popup] = await Promise.all([
   page.waitForEvent('popup'),
-  page.getByRole('link', { name: 'Launch Caravan' }).click()
+  tapTileFrom(page, 'Caravan', 'east')
 ]);
+
 await expect(popup).toHaveURL('https://games.example.test/caravan');
 expect(await popup.evaluate(() => window.opener)).toBeNull();
+expect(await page.getByRole('dialog').count()).toBe(0);
 ```
 
-Also test invalid schemes, popup-blocked fallback, Enter/Space behavior where
-appropriate, and that a launch record is not written on validation failure.
+Repeat this contract for north, east, south, west, and one corner, rotating the
+ring as needed to bring the same fixture game near that approach. Also test an
+invalid scheme, popup-blocked/error feedback, and exactly-once dispatch.
 
 ## Scenario inventory
 
 | ID | Journey | Required evidence |
 | --- | --- | --- |
-| 001 | App shell | cold boot, current/offline badge, desktop + phone shell |
-| 002 | Anonymous auth | silent first session, reload UID restore, distinct contexts |
-| 003 | Library data | legacy parsing/order, image fallback, empty and invalid records |
-| 004 | Find and inspect | search, clear, deep link, back/focus restoration |
-| 005 | Launch | safe popup, invalid URL, blocked-popup fallback, recent update |
-| 006 | Preferences/account | favourite persistence, Google link, collision merge, guest reset |
-| 007 | Resilience | stale cache, disconnect/reconnect, permission denied, retry |
-| 008 | Responsive/a11y | keyboard-only, 200% zoom, phone/landscape, reduced/forced colours |
+| 001 | Tabletop shell | full-screen no-top layout, loading/current, no scroll |
+| 002 | Anonymous auth | invisible first session, reload restore, auth failure perimeter |
+| 003 | Catalogue ring | legacy parsing/order, fallback icon, 8 and overflow catalogues |
+| 004 | Omnidirectional launch | same fixture from N/E/S/W/corner, immediate safe URL |
+| 005 | Swipe/arbitration | handles, empty track, tile drag, thresholds, cancel, settle |
+| 006 | Resilience | cached offline ring, reconnect, empty, permission/error retry |
+| 007 | Multi-touch/a11y | simultaneous pointers, reduced motion, forced colours, service keyboard |
 
 ## Visual baseline policy
 
-- Canonical visual approval occurs in Linux CI only. macOS may run semantic E2E
-  without maintaining a second source of visual truth.
-- Use element screenshots only when the element is the review surface; use a
-  viewport screenshot for layout journeys. Avoid `fullPage` on no-scroll views
-  because it can hide accidental overflow.
-- Mask only values that are intrinsically non-deterministic and not under test.
-  Prefer fixing the source value. Broad masks are forbidden.
-- Updating a baseline requires reading the before/after images, describing the
-  intended visual change in the PR, and committing the generated walkthrough.
-- Thresholds, per-channel tolerance, image smoothing, or retry are not substitutes
-  for deterministic rendering.
+- Linux CI is the only visual source of truth.
+- Use viewport screenshots; `fullPage` is forbidden because it can conceal
+  accidental document overflow on the fixed table.
+- Store baseline states at ring angle 0 and one deterministic rotated angle.
+- Capture error/empty states with all four perimeter copies visible.
+- Masking broad regions, loosening tolerances, retries, or platform-specific
+  thresholds is forbidden.
+- A baseline update requires inspecting before/after images and describing the
+  intended tabletop relationship in the PR.
 
-## Accessibility checks
+## Physical-device acceptance
 
-Automated checks are a floor. Each major journey also asserts:
+Playwright cannot prove reach, glare, or parallax. Before release, run the E2E
+fixture build on the real table and record a short manual checklist:
 
-- the focused element after navigation or dialog close;
-- logical tab order and no keyboard trap;
-- accessible names for all active controls;
-- heading and landmark structure;
-- status/error announcement semantics;
-- 44×44 target geometry on touch viewports;
-- no horizontal document overflow at 200% zoom; and
-- no control overlap in every tested viewport.
+- seated and standing launch from all four sides;
+- one corner approach;
+- drag with a sleeve/palm resting near another edge;
+- two people touching different areas;
+- title legibility under room lighting;
+- target reach without leaning across the center; and
+- target game takes over cleanly after launch.
 
-The implementation PR documents one manual VoiceOver or NVDA pass per major
-surface before release.
+This report is release evidence, not a substitute for automated tests.
 
 ## Commands (implementation target)
 
@@ -210,16 +257,16 @@ npm run test:e2e:update-snapshots
 npm run verify:change
 ```
 
-`verify:change` runs formatting, static checks, unit tests, rules tests, E2E,
-the production build, `git diff --check`, and validation that no skipped/focused
-tests or relaxed screenshot settings exist. Pre-commit hooks may call the same
-script; they are never bypassed.
+`verify:change` runs formatting, static checks, unit/rules/E2E tests, production
+build, `git diff --check`, and guards against skipped/focused tests, arbitrary
+waits, phone projects, production Firebase identifiers, and relaxed screenshot
+settings. Hooks are never bypassed.
 
 ## Failure triage
 
-1. Read the first semantic failure before examining the pixel diff.
-2. Inspect trace, screenshot, console, and emulator logs attached by CI.
-3. Reproduce in the pinned environment, not by changing the baseline locally.
-4. Fix application state, fixture state, or an unpinned rendering input.
+1. Read the first semantic or geometry failure before the image diff.
+2. Inspect trace, screenshot, pointer log, console, and emulator log.
+3. Reproduce in the pinned 1920 × 1080 environment.
+4. Fix state, geometry, fixture, or an unpinned rendering input.
 5. If the visual change is intended, update once in the canonical environment,
-   inspect it, and describe it in the PR.
+   inspect all four approach zones, and describe it in the PR.

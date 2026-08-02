@@ -1,23 +1,28 @@
-# ADR 0004: Emulator-only deterministic E2E
+# ADR 0004: Fixed-table emulator-only deterministic E2E
 
 - Status: Proposed
 - Date: 2026-08-02
 
 ## Context
 
-The rewrite requires trustworthy behavior and visual evidence without risking
-the existing backend. Cross-platform font and GPU differences make multiple
-visual sources of truth costly and ambiguous.
+The rewrite requires trustworthy behavioral and visual evidence without risking
+the existing backend. Its defining risks are not responsive phone breakpoints;
+they are radial geometry, edge orientation, touch arbitration, and simultaneous
+access on one installed table.
 
 ## Decision
 
-Run E2E against Firebase Auth/Firestore emulators, a versioned fixture, and one
-pinned Linux Chromium environment for zero-pixel visual baselines. Use a shared
-step helper to generate assertions, screenshots, and walkthroughs together.
+Run E2E against Firebase Auth/Firestore emulators and versioned fixture icons at
+the 1920 × 1080 reference table viewport. Use pinned Linux Chromium for
+zero-pixel baselines. Exercise north, east, south, west, and corner approaches
+with real pointer input. Generate assertions, screenshots, and walkthroughs
+through one step helper.
 
 ## Consequences
 
-- Tests cannot validate production connectivity directly; a separate protected
-  read-only compatibility check covers that boundary.
-- Canonical visual reviews are repeatable and have one source of truth.
-- Emulator setup and fixture lifecycle are production code-quality concerns.
+- Canonical visual review has one stable source of truth.
+- Phone projects and conventional responsive snapshots are out of scope.
+- Production connectivity is covered separately by protected read-only
+  acceptance.
+- Physical reach, glare, and palm behavior require a documented real-table pass
+  in addition to automation.

@@ -6,11 +6,10 @@ Version one uses the same Firebase project, Firestore database, and default
 database as LauncherUI. The rewrite must be deployable without changing or
 copying the existing `Applications` documents.
 
-The concrete Firebase project identifier and web configuration stay in
-environment configuration and GitHub secrets. The design documents intentionally
-do not duplicate those values.
+The concrete Firebase project identifier and web configuration remain in
+environment configuration and repository secrets.
 
-## Legacy catalogue contract
+## Complete product data contract
 
 Observed LauncherUI query:
 
@@ -28,16 +27,15 @@ interface LegacyApplication {
 }
 ```
 
-The capitalized collection and field names are compatibility-sensitive. The
-new client reads them unchanged through one adapter and maps them to an internal
-model:
+That is the entire launcher data model. The new client reads those fields
+unchanged through one adapter:
 
 ```ts
-interface GameSummary {
+interface GameTile {
   id: string;
   title: string;
-  launchUrl: URL;
   iconUrl: URL | null;
+  launchUrl: URL;
   availability: 'launchable' | 'invalid';
   issues: CatalogueIssue[];
 }
@@ -45,95 +43,71 @@ interface GameSummary {
 
 Validation rules:
 
-- `id` is the Firestore document ID and is never derived from the title.
-- `Title` must be a trimmed, non-empty string. Invalid records are excluded from
-  normal results and counted in a non-sensitive diagnostics state.
-- `URL` must parse as `https:`. `javascript:`, `data:`, credentials in URLs, and
-  non-HTTPS production URLs are rejected.
-- `Icon` may be an `https:` URL or a safe site-relative asset path. Failure falls
-  back to an in-app placeholder and never blocks launch.
-- Client ordering uses a pinned locale/collator after validation, while a
-  compatibility test compares its result with legacy `orderBy('Title')` data.
+- `id` is the Firestore document ID and is never derived from title.
+- `Title` must be a trimmed non-empty string and is the tile's only visible text.
+- `URL` must parse as `https:`. Credentials, `javascript:`, `data:`, and non-HTTPS
+  production targets are rejected.
+- `Icon` may be an `https:` URL or a safe site-relative asset path. Failure uses
+  a deterministic placeholder without blocking a valid launch URL.
+- Titles sort with one pinned collator before radial placement.
+- Invalid records are excluded from active tiles and counted in a non-sensitive
+  diagnostics state; malformed values are never rendered as HTML.
 
-## Preferences contract
+## Fields intentionally absent
 
-LauncherUI's existing rules already reserve `users/{uid}` for its owner. The
-new client stores one bounded document there; this remains subject to rules
-validation in an implementation PR.
+Do not read, infer, cache, or display player count, duration, genre, description,
+setup, options, popularity, recent activity, favourites, categories, or user
+preferences. The launcher cannot promise facts its backend does not supply.
 
-```ts
-interface UserPreferencesV1 {
-  schemaVersion: 1;
-  favouriteGameIds: string[];       // unique, maximum 100
-  recentGames: Array<{
-    gameId: string;
-    launchedAt: Timestamp;
-  }>;                               // newest first, maximum 20
-  appearance: 'system' | 'dark';
-  updatedAt: Timestamp;
-}
-```
+Version one does not read or write `users/{uid}`. Firebase Auth exists solely to
+satisfy the authenticated catalogue rule.
 
-Do not create a client-writeable global favourites or play-count collection.
-No preference can grant access or alter a catalogue application.
+## Cache
+
+The appliance keeps a versioned IndexedDB snapshot containing normalized title,
+icon URL, launch URL, document ID, and a server-read timestamp. Cached tiles may
+appear only after auth restoration and are labelled Offline around every table
+edge until a server snapshot arrives. A schema mismatch discards the cache.
+
+Remote icons use normal browser caching plus a deterministic fallback. E2E uses
+only repository fixture icons.
 
 ## Firestore rules target
 
-The first implementation should preserve effective catalogue access and tighten
-user writes:
+Version one preserves the effective production boundary:
 
 ```text
 Applications/{document=**}
   read: authenticated
   write: denied
 
-users/{uid}
-  read: authenticated owner
-  create/update: authenticated owner + exact allowed fields + size/type limits
-  delete: authenticated owner
-
-everything else
+everything else used by this client
   denied
 ```
 
-Rules changes are deployed only after emulator tests pass against valid,
-unauthenticated, cross-user, extra-field, oversize, and wrong-type requests.
-
-## Cache
-
-The client keeps a versioned IndexedDB snapshot containing only normalized
-catalogue fields and a server-read timestamp. Cached content is rendered only
-after auth restoration and is labelled Offline or Updating until a server
-snapshot arrives. A schema-version mismatch discards the cache safely.
-
-Images use normal browser caching with an in-app fallback. Service-worker
-precache must not enumerate third-party catalogue art.
+Existing unrelated rules may remain for compatibility, but the ttlauncher code
+must contain no path that writes them. Rules tests prove authenticated reads,
+unauthenticated denial, and all catalogue writes denied.
 
 ## Migration and rollout
 
-No data rewrite is required for the initial release.
+No data rewrite is required.
 
-1. Export or otherwise verify a recoverable backup according to the Firebase
-   project's normal operating procedure.
-2. Run a read-only catalogue audit that reports invalid legacy records without
-   mutating them.
+1. Verify a recoverable backup under the Firebase project's normal procedure.
+2. Run a read-only audit that reports invalid legacy records without mutation.
 3. Enable anonymous Auth in the existing project.
-4. Deploy tightened `users/{uid}` rules only if their emulator suite proves
-   backward compatibility for any known LauncherUI user document.
-5. Deploy Table Top Launcher to a separate Hosting preview channel.
-6. Run both clients against the same database and compare normalized IDs,
-   titles, URLs, and ordering.
-7. Promote the new hosting release. Keep the previous hosting release available
-   for immediate rollback.
+4. Deploy to a separate Hosting preview channel.
+5. Run LauncherUI and Table Top Launcher against the same database and compare
+   normalized IDs, titles, icon targets, launch URLs, and ordering.
+6. Exercise every valid game URL from a protected acceptance environment.
+7. Promote the new hosting release and retain the preceding release for rollback.
 
-Rollback changes the hosted client only. Because the catalogue is untouched and
-preferences are namespaced/versioned, rollback does not require restoring the
-database.
+Rollback changes the hosted client only. There are no ttlauncher writes or data
+migrations to undo.
 
-## Future catalogue evolution
+## Future evolution
 
-New optional metadata—player counts, duration, description, tags, and hero
-art—may be introduced only as backward-compatible fields. Until populated, the
-UI uses honest “Not provided” states; it must not infer factual game metadata
-from titles or generated mockups. An admin-owned catalogue schema and migration
-tool require a separate ADR.
+Any request for catalogue metadata, personalization, admin editing, or launch
+parameters changes the product contract and requires a new ADR, schema/rules
+design, omnidirectional UX review, and explicit user approval. It must not slip
+into a tile as an “optional” field.

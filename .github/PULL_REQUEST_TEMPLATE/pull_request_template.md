@@ -20,8 +20,9 @@
 - [ ] Firestore rules tests pass, or not applicable
 - [ ] E2E passes against emulators, or not applicable
 - [ ] Canonical screenshots and generated walkthroughs were inspected
-- [ ] PR preview was checked at desktop and phone widths
-- [ ] Keyboard, empty, loading, offline, and error states were considered
+- [ ] PR preview was checked at the fixed 1920 × 1080 tabletop viewport
+- [ ] North, east, south, west, and corner touch effects were considered
+- [ ] Empty, loading, offline, error, drag, and pointer-cancel states were considered
 
 ## Visual change
 
