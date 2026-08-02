@@ -36,21 +36,38 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          path: source
+      - name: Check out Pages branch
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: pages-output
       - name: Assemble static preview
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          mkdir -p preview-dist/mockups
-          cp preview/index.html preview/styles.css preview-dist/
-          cp docs/mockups/*.png preview-dist/mockups/
-          printf '%s\n' "User-agent: *" "Disallow: /pr-${PR_NUMBER}/" > preview-dist/robots.txt
-      - name: Publish PR directory
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: preview-dist
-          destination_dir: pr-${{ github.event.pull_request.number }}
-          keep_files: true
+          [[ "$PR_NUMBER" =~ ^[0-9]+$ ]]
+          cd pages-output
+          git rm -r --ignore-unmatch -- "pr-${PR_NUMBER}"
+          mkdir -p "pr-${PR_NUMBER}/mockups"
+          cp ../source/preview/index.html ../source/preview/styles.css "pr-${PR_NUMBER}/"
+          cp ../source/docs/mockups/*.png "pr-${PR_NUMBER}/mockups/"
+          printf '%s\n' "User-agent: *" "Disallow: /pr-${PR_NUMBER}/" > "pr-${PR_NUMBER}/robots.txt"
+      - name: Publish exact PR directory
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          cd pages-output
+          git add -A -- "pr-${PR_NUMBER}"
+          if git diff --cached --quiet; then
+            echo "Preview is already current."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Deploy preview for PR ${PR_NUMBER}"
+          git push
       - name: Add preview link to pull request
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

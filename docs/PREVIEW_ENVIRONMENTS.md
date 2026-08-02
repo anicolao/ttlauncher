@@ -53,8 +53,10 @@ smoke checks verify:
 
 ## GitHub Pages setup and cleanup
 
-Pages is served from `gh-pages` at `/`. The publish action uses `keep_files: true`
-so PR directories coexist. Same-repository PRs deploy; forks validate only.
+Pages is served from `gh-pages` at `/`. The workflow validates the numeric PR
+number, removes exactly that tracked `pr-N` directory with `git rm`, rebuilds it,
+and commits only that path. Other PR directories coexist untouched.
+Same-repository PRs deploy; forks validate only.
 
 Closed-PR cleanup is a follow-up that deletes exactly `pr-<number>` after numeric
 validation. Until then, static preview directories can remain harmlessly on the
