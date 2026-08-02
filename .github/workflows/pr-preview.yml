@@ -1,0 +1,64 @@
+name: PR preview
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: pr-preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate design package
+        run: node scripts/validate-design-package.mjs
+
+  deploy:
+    needs: validate
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    permissions:
+      contents: write
+      pull-requests: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Assemble static preview
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          mkdir -p preview-dist/mockups
+          cp preview/index.html preview/styles.css preview-dist/
+          cp docs/mockups/*.png preview-dist/mockups/
+          printf '%s\n' "User-agent: *" "Disallow: /pr-${PR_NUMBER}/" > preview-dist/robots.txt
+      - name: Publish PR directory
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: preview-dist
+          destination_dir: pr-${{ github.event.pull_request.number }}
+          keep_files: true
+      - name: Add preview link to pull request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PREVIEW_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/pr-${{ github.event.pull_request.number }}/
+        run: >-
+          gh pr comment "$PR_NUMBER"
+          --repo "$GITHUB_REPOSITORY"
+          --edit-last
+          --create-if-none
+          --body "Design preview: [$PREVIEW_URL]($PREVIEW_URL) · data mode: fixture · no backend connection"

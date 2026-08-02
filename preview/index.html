@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <meta
+      name="description"
+      content="Table Top Launcher design foundation and interface mockups"
+    />
+    <title>Table Top Launcher — Design Preview</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to design preview</a>
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="Table Top Launcher design preview home">
+        <span class="brand-mark" aria-hidden="true">◆</span>
+        <span>Table Top Launcher</span>
+      </a>
+      <span class="mode"><span aria-hidden="true"></span> Design only · fixture</span>
+    </header>
+
+    <main id="main">
+      <section class="hero" id="top">
+        <p class="eyebrow">Foundation proposal · 2026</p>
+        <h1>From game shelf to game night.</h1>
+        <p class="lede">
+          A ground-up launcher that keeps the proven Firebase catalogue, removes
+          the account wall, and treats accessible interaction and E2E evidence as
+          product features.
+        </p>
+        <nav class="jump-links" aria-label="Preview sections">
+          <a href="#library">Library</a>
+          <a href="#details">Game details</a>
+          <a href="#mobile">Mobile</a>
+          <a href="#decisions">Decisions</a>
+        </nav>
+      </section>
+
+      <section class="principles" aria-label="Product principles">
+        <article>
+          <span>01</span>
+          <h2>Play before profile</h2>
+          <p>Restore a Firebase session or create a secure guest silently.</p>
+        </article>
+        <article>
+          <span>02</span>
+          <h2>Keep the catalogue</h2>
+          <p>Read the existing Applications collection through a safe adapter.</p>
+        </article>
+        <article>
+          <span>03</span>
+          <h2>Proof with every PR</h2>
+          <p>Semantic assertions, screenshots, and walkthroughs stay together.</p>
+        </article>
+      </section>
+
+      <section class="screen" id="library" aria-labelledby="library-title">
+        <div class="section-copy">
+          <p class="eyebrow">01 · Desktop library</p>
+          <h2 id="library-title">Warm, useful, immediately playable.</h2>
+          <p>
+            A recent game leads the scan path. Search and honest metadata filters
+            support larger libraries without turning the launcher into a dashboard.
+          </p>
+        </div>
+        <a href="mockups/library-desktop.png" aria-label="Open desktop library mockup at full size">
+          <img
+            src="mockups/library-desktop.png"
+            alt="Desktop concept showing a warm dark game library, featured Caravan game, search, filters, and four fictional game cards"
+            width="1586"
+            height="992"
+          />
+        </a>
+      </section>
+
+      <section class="screen" id="details" aria-labelledby="details-title">
+        <div class="section-copy">
+          <p class="eyebrow">02 · Game details</p>
+          <h2 id="details-title">One clear, safe launch.</h2>
+          <p>
+            Deep-linkable details preserve library context. Setup controls appear
+            only when backed by real data; launch targets are revalidated at use.
+          </p>
+        </div>
+        <a href="mockups/game-detail-desktop.png" aria-label="Open game-detail mockup at full size">
+          <img
+            src="mockups/game-detail-desktop.png"
+            alt="Desktop concept showing original Caravan art, game metadata, setup choices, favourite action, and launch action"
+            width="1586"
+            height="992"
+            loading="lazy"
+          />
+        </a>
+      </section>
+
+      <section class="mobile-section" id="mobile" aria-labelledby="mobile-title">
+        <div class="section-copy">
+          <p class="eyebrow">03 · Mobile library</p>
+          <h2 id="mobile-title">The same hierarchy, built for a thumb.</h2>
+          <p>
+            Mobile uses honest document scrolling, large targets, safe-area-aware
+            navigation, and a featured action that never hides the library.
+          </p>
+          <ul>
+            <li>44 × 44 CSS-pixel minimum controls</li>
+            <li>Visible state labels, never colour alone</li>
+            <li>Keyboard, screen reader, and 200% zoom acceptance</li>
+          </ul>
+        </div>
+        <a href="mockups/library-mobile.png" aria-label="Open mobile library mockup at full size">
+          <img
+            src="mockups/library-mobile.png"
+            alt="Phone concept showing the Table Top Launcher guest library with Caravan featured and fictional game cards"
+            width="853"
+            height="1844"
+            loading="lazy"
+          />
+        </a>
+      </section>
+
+      <section class="decisions" id="decisions" aria-labelledby="decisions-title">
+        <p class="eyebrow">Engineering decisions</p>
+        <h2 id="decisions-title">A smaller surface with stronger boundaries.</h2>
+        <dl>
+          <div>
+            <dt>Authentication</dt>
+            <dd>Anonymous first; optional Google credential link later.</dd>
+          </div>
+          <div>
+            <dt>Database</dt>
+            <dd>Same Firebase project and legacy Applications documents.</dd>
+          </div>
+          <div>
+            <dt>Interface</dt>
+            <dd>Semantic Svelte/HTML/CSS; no essential canvas or WebGL.</dd>
+          </div>
+          <div>
+            <dt>Testing</dt>
+            <dd>Firebase emulators, pinned Chromium, zero-pixel Linux baselines.</dd>
+          </div>
+          <div>
+            <dt>Previews</dt>
+            <dd>PR-specific URL; fixture mode by default; production writes forbidden.</dd>
+          </div>
+          <div>
+            <dt>Rollback</dt>
+            <dd>Hosting release switch; no catalogue migration to undo.</dd>
+          </div>
+        </dl>
+      </section>
+
+      <aside class="note" aria-label="Mockup disclaimer">
+        <strong>Reference, not implementation.</strong>
+        These AI-generated mockups establish mood and hierarchy. Production uses
+        accessible semantic controls, actual Firestore data, licensed assets, and
+        tested design tokens—not pixels or fictional metadata sampled from images.
+      </aside>
+    </main>
+
+    <footer>
+      <span>Table Top Launcher · GPL-3.0</span>
+      <a href="https://github.com/anicolao/ttlauncher">Repository</a>
+    </footer>
+  </body>
+</html>
