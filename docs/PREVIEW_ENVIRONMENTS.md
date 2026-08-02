@@ -8,70 +8,69 @@ Every same-repository PR receives a stable URL:
 https://anicolao.github.io/ttlauncher/pr-<number>/
 ```
 
-The workflow validates the design package, publishes a PR-specific directory on
-the `gh-pages` branch, and creates or updates one bot comment with the link.
-Concurrent pushes to the same PR cancel the older deployment.
+The workflow validates the package, publishes a PR-specific directory on
+`gh-pages`, and updates one bot comment. Concurrent pushes to the same PR cancel
+the older deployment.
 
-This initial design PR previews `preview/index.html` plus the three mockups. It
-does not impersonate a working product or connect to Firebase.
+This design PR previews the omnidirectional mockups and interaction contract. It
+does not impersonate a working launcher or connect to Firebase.
 
 ## Application preview modes
 
-Once the Svelte app exists, preview builds must declare one mode visibly in the
-support/profile panel and PR description:
+Once the Svelte app exists, preview builds declare a mode in four small
+edge-facing build labels or a service-only diagnostics overlay:
 
 | Mode | Source | Auth | Writes | Use |
 | --- | --- | --- | --- | --- |
-| `fixture` (default) | Versioned local catalogue | In-memory guest facade | None | Forks and ordinary UI review |
-| `live-read` | Existing LauncherUI Firestore | Real Firebase anonymous auth | Catalogue read; preferences disabled | Trusted compatibility review |
-| `emulator` | Local Firebase emulators | Auth emulator | Isolated emulator only | Developer and automated E2E |
-| `production` | Existing LauncherUI Firebase | Real Firebase | Rules-controlled | Released site only |
+| `fixture` (default) | Versioned local catalogue | In-memory/emulated ready state | None | Ordinary and fork-safe visual review |
+| `live-read` | Existing LauncherUI Firestore | Real anonymous Firebase auth | None | Trusted compatibility review |
+| `emulator` | Local Firebase emulators | Auth emulator | None | Developer and automated E2E |
+| `production` | Existing LauncherUI Firebase | Real anonymous auth | None | Released table only |
 
-Mode is a required build-time variable. The app must fail closed on an unknown
-mode; it must not choose production based on hostname.
+Mode is a required build-time variable. Unknown mode fails closed; hostname
+guessing is forbidden.
+
+## Preview viewport
+
+The application preview opens at 1920 × 1080 and documents that fixed table
+assumption. Reviewers may scale the browser to view it, but CSS breakpoints must
+not transform it into a phone or conventional desktop UI. Automated preview
+smoke checks verify:
+
+- the entire radial surface is present with no document scroll;
+- north/east/south/west tiles and handles exist;
+- exactly title and icon content appears on valid game tiles; and
+- no profile, setup, details, filter, or settings control is present.
 
 ## Secrets and trust boundary
 
-- Fixture previews need only the repository `GITHUB_TOKEN`.
-- Live-read previews are allowed only for branches in this repository, never
-  forks, and use repository/environment secrets containing the public Firebase
-  web configuration.
-- Firebase web config is not an authorization secret, but centralizing it avoids
-  accidental project drift. Firestore rules and Auth authorized domains remain
-  the security boundary.
-- Do not give preview workflows service-account keys or Firebase Admin access.
-- Do not expose user preference writes in live-read mode.
+- Fixture previews require only `GITHUB_TOKEN`.
+- Live-read is allowed only for branches in this repository, never forks, and
+  uses repository/environment secrets for public Firebase web configuration.
+- Do not give previews service-account keys or Firebase Admin access.
+- The app code has no Firestore write path in any mode.
+- Firebase rules and authorized origins remain the security boundary.
 
-## GitHub Pages setup
+## GitHub Pages setup and cleanup
 
-Repository administration enables Pages from the `gh-pages` branch at `/`.
-The preview workflow uses `keep_files: true` so multiple PR directories can
-coexist. The initial repository setup performs this once; the workflow does not
-need admin credentials.
+Pages is served from `gh-pages` at `/`. The publish action uses `keep_files: true`
+so PR directories coexist. Same-repository PRs deploy; forks validate only.
 
-The workflow intentionally deploys same-repository PRs only. Fork PRs still run
-validation but do not receive a write token or deployment.
-
-## Cleanup
-
-Closed-PR cleanup is a follow-up to the scaffold, implemented as a separate job
-that deletes exactly `pr-<number>` from `gh-pages`. It must validate that the
-number is numeric and must never use a broad recursive target. Until that job is
-implemented, old preview directories are harmless static artifacts and can be
-removed manually from the Pages branch.
+Closed-PR cleanup is a follow-up that deletes exactly `pr-<number>` after numeric
+validation. Until then, static preview directories can remain harmlessly on the
+Pages branch.
 
 ## Preview acceptance
 
-- The bot comment URL returns HTTP 200 after deployment.
-- Relative CSS and image URLs work at the nested `/pr-N/` base path.
-- Refreshing any application route works after the Svelte fallback is added.
-- The page visibly names its data mode.
-- Same-PR updates replace that directory without deleting other previews.
+- Bot URL and both tabletop mockup assets return HTTP 200.
+- Relative assets work at nested `/pr-N/` paths.
+- The page visibly states design-only or fixture mode.
+- Same-PR updates preserve other preview directories.
 - Failed validation never deploys.
 
 ## Production separation
 
-A PR preview is not a Firebase Hosting release candidate. Promotion to the
-existing production hosting surface is a separate, protected workflow that uses
-a built artifact already verified by CI, records the hosting release, and keeps
-the preceding release available for rollback.
+A PR preview is not a production release. Promotion is a separate protected
+workflow using a CI-verified artifact and retaining the preceding Hosting release
+for rollback. Live-read proves data compatibility only; physical-table acceptance
+remains mandatory before promotion.

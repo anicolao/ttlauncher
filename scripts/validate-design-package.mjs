@@ -17,9 +17,8 @@ const required = [
   'docs/UX_DESIGN.md',
   'docs/PREVIEW_ENVIRONMENTS.md',
   'docs/IMPLEMENTATION_PLAN.md',
-  'docs/mockups/library-desktop.png',
-  'docs/mockups/game-detail-desktop.png',
-  'docs/mockups/library-mobile.png',
+  'docs/mockups/omnidirectional-launcher.png',
+  'docs/mockups/tabletop-in-context.png',
   'docs/mockups/README.md',
   'preview/index.html',
   'preview/styles.css'
@@ -28,6 +27,14 @@ const required = [
 const failures = [];
 for (const path of required) {
   if (!existsSync(resolve(root, path))) failures.push(`Missing required file: ${path}`);
+}
+
+for (const path of [
+  'docs/mockups/library-desktop.png',
+  'docs/mockups/game-detail-desktop.png',
+  'docs/mockups/library-mobile.png'
+]) {
+  if (existsSync(resolve(root, path))) failures.push(`Obsolete personal-device mockup remains: ${path}`);
 }
 
 const markdownFiles = required.filter((path) => extname(path) === '.md');
@@ -75,6 +82,11 @@ if (existsSync(resolve(root, 'preview/index.html'))) {
   }
   if (!preview.includes('Design only · fixture')) {
     failures.push('preview/index.html: data mode is not visible');
+  }
+  for (const invariant of ['no head of the table', 'One tap launches', 'Title, Icon, URL']) {
+    if (!preview.toLowerCase().includes(invariant.toLowerCase())) {
+      failures.push(`preview/index.html: missing tabletop invariant: ${invariant}`);
+    }
   }
 }
 
