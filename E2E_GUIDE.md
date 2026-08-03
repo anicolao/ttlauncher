@@ -153,12 +153,12 @@ Every pointer path asserts command count, not just final URL:
 | Gesture | Expected result |
 | --- | --- |
 | Down/up inside one tile below threshold | Exactly one launch command |
-| Down, cross one 45° step, up over same tile | Adjacent page loads; zero launches |
+| Down, cross one 45° step, up over same tile | One game exits and one enters; zero launches |
 | Down on tile, release outside below/at cancellation rule | Zero launches |
 | Down then `pointercancel` | State resets; zero launches |
-| Drag handle/empty track | Pages browse in drag direction and wrap; zero launches |
-| Tap center with overflow catalogue | Next page of eight; zero launches |
-| Tap center on final page | Wrap to page one; zero launches |
+| Drag handle/empty track | Eight-slot window streams through the tunnel; zero launches |
+| Tap center with overflow catalogue | Ring animates to next eight-game boundary; zero launches |
+| Tap center on final boundary | Ring advances through the wrap to game zero; zero launches |
 | Tap inert center with ≤8 games | No state change; zero launches |
 | Two near-simultaneous taps | At most the explicitly selected first launch |
 | Tap while ring is settling | Defined safe behavior; never duplicate launch |
@@ -192,7 +192,7 @@ invalid scheme, popup-blocked/error feedback, and exactly-once dispatch.
 | --- | --- | --- |
 | 001 | Tabletop shell | full-screen no-top layout, loading/current, no scroll |
 | 002 | Anonymous auth | invisible first session, reload restore, auth failure perimeter |
-| 003 | Catalogue/paging | legacy parsing/order, fallback icon, pages of 8, tap/spin paging, bidirectional wrap |
+| 003 | Catalogue/paging | legacy parsing/order, fixed 8 slots, tunnel replacement, animated boundaries, wrap |
 | 004 | Omnidirectional launch | same fixture from N/E/S/W/corner, immediate safe URL |
 | 005 | Swipe/arbitration | handles, empty track, tile drag, thresholds, cancel, settle |
 | 006 | Resilience | cached offline ring, reconnect, empty, permission/error retry |

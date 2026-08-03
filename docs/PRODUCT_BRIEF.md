@@ -17,8 +17,8 @@ layout, account management, personal history, or preferred viewing direction.
 
 1. See that the shared table is ready.
 2. Recognize a game from its icon and title from the nearest edge.
-3. Spin the ring forward or backward through the alphabetical pages of eight,
-   or tap the center logo to load the next page.
+3. Spin the eight-slot ring through its tunnel one game at a time, or tap the
+   center logo to animate to the next eight-game boundary.
 4. Tap one game tile once.
 5. Leave the launcher as the target game opens. Everything after launch belongs
    to that game.
@@ -42,9 +42,11 @@ layout, account management, personal history, or preferred viewing direction.
 - Read-only access to the existing `Applications` collection
 - Runtime validation of legacy `Title`, `Icon`, and `URL` fields
 - One full-screen radial game carousel with outward-facing titles
-- Stable alphabetical pages of eight; center-logo tap advances and wraps pages
+- Eight permanently spaced slots over a wrapping alphabetical catalogue
+- Fixed tunnel replaces one outgoing game with one incoming game per ring step
+- Center-logo tap animates to the next catalogue boundary and wraps
 - Direct tap-to-launch with a brief pressed state and safe popup/navigation
-- One-finger continuous page browsing with tap-versus-drag disambiguation
+- One-finger continuous catalogue browsing with tap-versus-drag disambiguation
 - Loading, empty, offline-cache, and error states repeated/oriented for all sides
 - Static SvelteKit deployment, Firebase emulators, deterministic E2E, and PR
   previews at the exact table viewport

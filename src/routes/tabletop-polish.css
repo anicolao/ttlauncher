@@ -110,6 +110,82 @@ main.tabletop .orbit-inner {
 
 main.tabletop .game-ring { z-index: 3; }
 
+main.tabletop .catalogue-gate {
+  position: absolute;
+  left: 42.7%;
+  top: 18.6%;
+  z-index: 4;
+  width: clamp(10.5rem, 11vw, 13.5rem);
+  height: clamp(6.2rem, 11vh, 7.6rem);
+  transform: translate(-50%, -50%) rotate(-22.5deg);
+  pointer-events: auto;
+  border: .16rem solid rgba(94, 234, 241, .82);
+  border-radius: 2.8rem 2.8rem 1.1rem 1.1rem;
+  background:
+    linear-gradient(90deg, rgba(255, 225, 100, .85), transparent 12% 88%, rgba(255, 225, 100, .85)),
+    linear-gradient(#173a49, #06131c 72%);
+  box-shadow:
+    0 0 0 .55rem rgba(3, 11, 17, .94),
+    0 0 0 .72rem rgba(255, 225, 100, .2),
+    0 0 1.4rem rgba(94, 234, 241, .5),
+    inset 0 -.9rem 1rem rgba(0, 0, 0, .82);
+  filter: drop-shadow(0 .7rem .55rem rgba(0, 0, 0, .8));
+}
+
+main.tabletop .catalogue-gate::before {
+  content: '';
+  position: absolute;
+  inset: 1.15rem 1.45rem .75rem;
+  border: .2rem solid var(--gold);
+  border-radius: 2rem 2rem .65rem .65rem;
+  background:
+    radial-gradient(ellipse at 50% 115%, rgba(94, 234, 241, .25), transparent 55%),
+    linear-gradient(#02070b, #06131c 58%, #0d2935);
+  box-shadow:
+    inset 0 0 1.2rem #000,
+    0 0 .8rem rgba(255, 225, 100, .34);
+}
+
+main.tabletop .catalogue-gate::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -.7rem;
+  width: 82%;
+  height: 1.15rem;
+  translate: -50% 0;
+  border-radius: 50%;
+  background: #02080d;
+  box-shadow: 0 -.15rem .55rem rgba(94, 234, 241, .42);
+}
+
+main.tabletop .catalogue-gate span {
+  position: absolute;
+  left: 50%;
+  top: .45rem;
+  z-index: 1;
+  width: 42%;
+  height: .32rem;
+  translate: -50% 0;
+  border-radius: 999px;
+  background: var(--cyan);
+  box-shadow: 0 0 .65rem var(--cyan);
+}
+
+main.tabletop .catalogue-gate i {
+  position: absolute;
+  left: .65rem;
+  bottom: 1rem;
+  z-index: 1;
+  width: .5rem;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 .5rem var(--gold);
+}
+
+main.tabletop .catalogue-gate i:last-child { left: auto; right: .65rem; }
+
 main.tabletop .game-tile {
   width: clamp(13rem, 13.5vw, 16.2rem);
   height: clamp(13rem, 24vh, 17rem);
@@ -320,7 +396,8 @@ main.tabletop .edge-status.west {
   main.tabletop .game-tile {
     transition: left .2s ease-out, top .2s ease-out, transform .2s ease-out, filter .12s, scale .1s;
   }
-  main.tabletop.dragging .game-tile { transition: none; }
+  main.tabletop.dragging .game-tile,
+  main.tabletop.paging .game-tile { transition: none; }
 }
 
 @media (forced-colors: active) {

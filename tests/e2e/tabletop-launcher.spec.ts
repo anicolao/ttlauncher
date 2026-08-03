@@ -44,6 +44,7 @@ test('renders one fixed omnidirectional surface with safe geometry', async ({ pa
     verifications: [
       () => expect(page.locator('[data-game-id]')).toHaveCount(8),
       () => expect(page.locator('[data-handle]')).toHaveCount(4),
+      () => expect(page.locator('[data-catalogue-gate]')).toHaveCount(1),
       () => expect(page.getByRole('button', { name: /Show next games, page 2 of 3/ })).toBeVisible()
     ]
   });
@@ -76,7 +77,7 @@ test('renders one fixed omnidirectional surface with safe geometry', async ({ pa
   await expect(surface).toHaveAttribute('data-status', 'current');
 });
 
-test('center logo advances pages of eight and wraps without launching', async ({ page }, testInfo) => {
+test('center logo spins to eight-game boundaries and wraps without launching', async ({ page }, testInfo) => {
   await openLauncher(page);
   const steps = new TestStepHelper(page, testInfo);
   let popupCount = 0;
@@ -89,8 +90,9 @@ test('center logo advances pages of eight and wraps without launching', async ({
   await expect(center).toHaveAccessibleName('Show next games, page 3 of 3');
 
   await center.click();
-  await expect(page.locator('[data-game-id]')).toHaveCount(2);
+  await expect(page.locator('[data-game-id]')).toHaveCount(8);
   await expect(page.getByRole('button', { name: 'Launch Tidelines' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Launch Aurora Lines' })).toBeVisible();
   await expect(center).toHaveAccessibleName('Show next games, page 1 of 3');
 
   await center.click();
@@ -138,10 +140,9 @@ test('launches directly from north, east, south, west, and a corner', async ({ p
   });
 });
 
-test('dragging a tile continuously browses later pages and never launches it', async ({ page }, testInfo) => {
+test('a game crosses the tunnel and center paging completes its boundary', async ({ page }, testInfo) => {
   await openLauncher(page);
   const steps = new TestStepHelper(page, testInfo);
-  const tile = page.getByRole('button', { name: 'Launch Aurora Lines' });
   let popupCount = 0;
   page.on('popup', () => popupCount++);
 
@@ -149,8 +150,10 @@ test('dragging a tile continuously browses later pages and never launches it', a
 
   await expect(page.getByRole('button', { name: 'Launch Aurora Lines' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Launch Hearthland' })).toBeVisible();
+  await expect(page.locator('[data-game-id]')).toHaveCount(8);
+  await expect(page.locator('[data-e2e-layout]')).toHaveAttribute('data-sequence-start', '1');
   await expect(page.getByRole('button', { name: /Show next games/ }))
-    .toHaveAccessibleName('Show next games, page 3 of 3');
+    .toHaveAccessibleName('Show next games, page 2 of 3');
   expect(popupCount).toBe(0);
 
   const movedBox = await page.getByRole('button', { name: 'Launch Hearthland' }).boundingBox();
@@ -166,14 +169,13 @@ test('dragging a tile continuously browses later pages and never launches it', a
     verifications: [() => expect(popupCount).toBe(0)]
   });
 
-  await dragTileBy(page, 'Launch Hearthland', -60);
-  await expect(tile).toBeVisible();
+  await page.getByRole('button', { name: /Show next games/ }).click();
+  await expect(page.locator('[data-e2e-layout]')).toHaveAttribute('data-sequence-start', '8');
+  await expect(page.locator('[data-e2e-layout]')).toHaveAttribute('data-ring-angle', '0.00');
+  await expect(page.getByRole('button', { name: 'Launch Hearthland' }))
+    .toHaveAttribute('data-angle', '225.00');
+  await expect(page.locator('[data-game-id]')).toHaveCount(8);
   await expect(page.getByRole('button', { name: /Show next games/ }))
-    .toHaveAccessibleName('Show next games, page 2 of 3');
-
-  await dragTileBy(page, 'Launch Aurora Lines', -60);
-  await expect(page.getByRole('button', { name: 'Launch Tidelines' })).toBeVisible();
-  await expect(page.getByRole('button', { name: /Show next games/ }))
-    .toHaveAccessibleName('Show next games, page 1 of 3');
+    .toHaveAccessibleName('Show next games, page 3 of 3');
   expect(popupCount).toBe(0);
 });

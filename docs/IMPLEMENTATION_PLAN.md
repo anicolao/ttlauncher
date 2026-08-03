@@ -8,8 +8,8 @@ intermediate post-tap launcher flow.
 
 Deliver the source/auth audit and design package, then prove the central choices
 with a runnable SvelteKit slice: fixture and Firebase catalogue sources, silent
-anonymous auth, pages of eight, center-logo advance/wrap, ring drag, direct safe
-launch, emulator rules tests, and a build-based PR preview.
+anonymous auth, a wrapping eight-slot tunnel carousel, animated boundary paging,
+ring drag, direct safe launch, emulator rules tests, and a build-based PR preview.
 
 Exit criteria:
 
@@ -61,8 +61,9 @@ offline cache, and no Firestore write path.
 - Implement ellipse/ring geometry and outward/four-band title orientation.
 - Render large semantic tile controls, conditional center page button, four
   edge handles, and four outward-facing page counters.
-- Split overflow catalogues into stable alphabetical pages of eight without
-  shrinking or repeating targets; wrap center taps after the final page.
+- Render an eight-slot wrapping window over the alphabetical catalogue; replace
+  one token under the fixed tunnel per 45° step and animate center taps to the
+  next original-catalogue boundary.
 - Add geometry/unit/component coverage and E2E scenario 001.
 
 Exit criteria: target/gap/viewport invariants pass; north/east/south/west/corner
@@ -127,7 +128,7 @@ physical four-side checklist is recorded, and rollback is proven.
 | --- | --- |
 | A conventional “top” leaks into UI | Geometry assertions and four-side screenshots |
 | Tap becomes drag or duplicate launch | Pointer reducer plus threshold/exactly-once matrix |
-| Too many games shrink targets | Stable pages of eight; center tap advances; 45° swipe steps browse and wrap |
+| Too many games shrink targets | Fixed eight-slot window; one-for-one tunnel replacement; modular catalogue wrap |
 | Rotated titles are hard to read | Physical test continuous radial vs four-band snapping |
 | Multi-touch corrupts ring state | Pointer capture policy and simultaneous-hand tests |
 | Legacy malformed record | Runtime parser, safe omission/fallback |
