@@ -3,23 +3,23 @@ import { parseLegacyApplication, sortGames } from '$lib/domain/game-tile';
 
 const fixtures = [
   ['caravan', 'Caravan', 'caravan'],
-  ['dice-and-daggers', 'Dice & Daggers', 'daggers'],
-  ['forest-light', 'Forest Light', 'forest'],
-  ['hearthland', 'Hearthland', 'hearth'],
+  ['dice-and-daggers', 'Dice & Daggers', 'dice-and-daggers'],
+  ['forest-light', 'Forest Light', 'forest-light'],
+  ['hearthland', 'Hearthland', 'hearthland'],
   ['mosaic', 'Mosaic', 'mosaic'],
-  ['songbirds', 'Songbirds', 'songbird'],
-  ['star-charts', 'Star Charts', 'stars'],
-  ['tidelines', 'Tidelines', 'tides'],
-  ['clockwork-cove', 'Clockwork Cove', 'hearth'],
+  ['songbirds', 'Songbirds', 'songbirds'],
+  ['star-charts', 'Star Charts', 'aurora-lines'],
+  ['tidelines', 'Tidelines', 'tidelines'],
+  ['clockwork-cove', 'Clockwork Cove', 'mosaic'],
   ['ember-isles', 'Ember Isles', 'caravan'],
-  ['garden-guilds', 'Garden Guilds', 'forest'],
+  ['garden-guilds', 'Garden Guilds', 'songbirds'],
   ['lantern-market', 'Lantern Market', 'mosaic'],
-  ['moonlit-maps', 'Moonlit Maps', 'stars'],
-  ['paper-kingdoms', 'Paper Kingdoms', 'daggers'],
-  ['river-stones', 'River Stones', 'tides'],
-  ['winter-roost', 'Winter Roost', 'songbird'],
-  ['aurora-lines', 'Aurora Lines', 'stars'],
-  ['brass-and-bloom', 'Brass & Bloom', 'mosaic']
+  ['moonlit-maps', 'Moonlit Maps', 'aurora-lines'],
+  ['paper-kingdoms', 'Paper Kingdoms', 'dice-and-daggers'],
+  ['river-stones', 'River Stones', 'tidelines'],
+  ['winter-roost', 'Winter Roost', 'hearthland'],
+  ['aurora-lines', 'Aurora Lines', 'aurora-lines'],
+  ['brass-and-bloom', 'Brass & Bloom', 'songbirds']
 ] as const;
 
 export function createFixtureCatalogue(assetBase: string): CatalogueSource {
@@ -27,7 +27,7 @@ export function createFixtureCatalogue(assetBase: string): CatalogueSource {
   const parsed = fixtures.map(([id, title, icon]) =>
     parseLegacyApplication(id, {
       Title: title,
-      Icon: `${assetBase}/icons/${icon}.svg`,
+      Icon: `${assetBase}/art/${icon}.png`,
       URL: previewOrigin
         ? new URL(`${assetBase}/fixture-game.html?game=${id}`, previewOrigin).toString()
         : `https://games.example.test/${id}`

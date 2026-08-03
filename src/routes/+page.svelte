@@ -1,6 +1,7 @@
 <script lang="ts">
   import '@fontsource/atkinson-hyperlegible/400.css';
   import '@fontsource/atkinson-hyperlegible/700.css';
+  import './tabletop-polish.css';
   import { base } from '$app/paths';
   import { onMount } from 'svelte';
   import type { CatalogueSnapshot } from '$lib/data/catalogue-source';
@@ -170,7 +171,10 @@
   onpointercancel={pointerCancel}
 >
   <div class="ambient-grid" aria-hidden="true"></div>
+  <div class="wheel-halo" aria-hidden="true"></div>
+  <div class="wheel-bezel" aria-hidden="true"><i></i><i></i><i></i></div>
   <div class="orbit orbit-outer" aria-hidden="true"></div>
+  <div class="orbit orbit-middle" aria-hidden="true"></div>
   <div class="orbit orbit-inner" aria-hidden="true"></div>
 
   {#each ['north', 'east', 'south', 'west'] as edge}
@@ -196,17 +200,17 @@
           data-edge={position.edge}
           data-angle={position.angle.toFixed(2)}
           aria-label={`Launch ${game.title}`}
-          style={`--tile-x:${position.xPercent}%;--tile-y:${position.yPercent}%;--tile-rotation:${position.rotation}deg;`}
+          style={`--tile-x:${position.xPercent}%;--tile-y:${position.yPercent}%;--tile-rotation:${position.rotation}deg;--tile-shell-rotation:${position.shellRotation}deg;`}
           onclick={(event) => keyboardActivate(event, game)}
         >
-          <span class="icon-frame">
+          <span class="icon-frame tile-art">
             {#if game.iconSrc}
               <img src={game.iconSrc} alt="" draggable="false" />
             {:else}
               <span class="icon-fallback" aria-hidden="true">{game.title.slice(0, 2)}</span>
             {/if}
           </span>
-          <strong>{game.title}</strong>
+          <strong class="tile-title">{game.title}</strong>
         </button>
       {/each}
     </section>
