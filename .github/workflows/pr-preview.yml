@@ -62,13 +62,24 @@ jobs:
           node-version: '22'
           cache: npm
           cache-dependency-path: source/package-lock.json
-      - name: Build interactive fixture preview
+      - name: Build interactive live-read preview
         working-directory: source
         env:
           PUBLIC_BASE_PATH: /${{ github.event.repository.name }}/pr-${{ github.event.pull_request.number }}
-          PUBLIC_DATA_MODE: fixture
-          PUBLIC_FIXTURE_ORIGIN: https://${{ github.repository_owner }}.github.io
+          PUBLIC_DATA_MODE: firebase
+          PUBLIC_FIREBASE_API_KEY: ${{ secrets.PUBLIC_FIREBASE_API_KEY }}
+          PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ secrets.PUBLIC_FIREBASE_AUTH_DOMAIN }}
+          PUBLIC_FIREBASE_PROJECT_ID: ${{ secrets.PUBLIC_FIREBASE_PROJECT_ID }}
+          PUBLIC_FIREBASE_STORAGE_BUCKET: ${{ secrets.PUBLIC_FIREBASE_STORAGE_BUCKET }}
+          PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
+          PUBLIC_FIREBASE_APP_ID: ${{ secrets.PUBLIC_FIREBASE_APP_ID }}
         run: |
+          for variable in PUBLIC_FIREBASE_API_KEY PUBLIC_FIREBASE_AUTH_DOMAIN PUBLIC_FIREBASE_PROJECT_ID PUBLIC_FIREBASE_APP_ID; do
+            if [[ -z "${!variable}" ]]; then
+              echo "Required live-read configuration is missing: ${variable}" >&2
+              exit 1
+            fi
+          done
           npm ci
           npm run build
       - name: Assemble static preview
@@ -105,4 +116,4 @@ jobs:
           --repo "$GITHUB_REPOSITORY"
           --edit-last
           --create-if-none
-          --body "Interactive launcher preview: [$PREVIEW_URL]($PREVIEW_URL) · data mode: fixture · no backend connection"
+          --body "Interactive launcher preview: [$PREVIEW_URL]($PREVIEW_URL) · data mode: live-read · existing LauncherUI Applications catalogue · anonymous auth · no client writes"

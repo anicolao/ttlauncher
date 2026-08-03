@@ -41,12 +41,13 @@ The generated image is a hierarchy and geometry reference, not a pixel spec.
 Implementation uses real DOM tiles, actual Firestore title/icon data, verified
 contrast, and deterministic design tokens.
 
-The runnable fixture surface intentionally matches its defining relationships:
+The runnable surface intentionally matches its defining relationships:
 a circular segmented wheel rather than floating rectangular cards, illustrated
 game emblems within deep wedge-shaped tokens, layered cyan/gold orbital rails, a
-large central crest, and bezel-mounted controls. Fixture illustration richness
-is representative; Firebase mode continues to render the existing catalogue's
-own `Icon` values.
+large central crest, and bezel-mounted controls. The tokens use continuously
+rounded corners like physical inserts rather than sharp polygon joints. Fixture
+illustration richness is representative; the live preview renders the existing
+catalogue's own `Icon` values.
 
 ## Reference mockup: physical context
 

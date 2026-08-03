@@ -74,8 +74,22 @@ its edge, while one semantic status region supplies assistive output.
 - Catalogue writes remain denied.
 - Version one makes no client Firestore writes.
 - Production and live-preview origins are explicitly authorized before use.
-- Enable anonymous Auth in the existing Firebase project as a reversible rollout
-  prerequisite; do not make the catalogue public to simulate guest access.
+- Keep anonymous Auth enabled in the existing Firebase project; do not make the
+  catalogue public to simulate guest access.
+
+## Live-read configuration
+
+Anonymous authentication was enabled for the existing `launcherui` Firebase
+project on 2026-08-03. The `anicolao.github.io` preview origin was added to the
+project's authorized domains at the same time. The change preserves the existing
+Firestore boundary: authenticated clients may read `Applications`, while this
+launcher has no client write path and the database rules continue to deny writes.
+
+The PR deployment receives only Firebase's public web-app configuration through
+GitHub Actions secrets. It receives no service-account credential, Admin SDK
+credential, refresh token, or database mutation capability. Automated tests do
+not use this configuration and continue to run against the Auth and Firestore
+emulators.
 
 ## Auth E2E contract
 
