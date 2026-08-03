@@ -105,7 +105,17 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "Deploy preview for PR ${PR_NUMBER}"
-          git push
+          for attempt in 1 2 3; do
+            if git push; then
+              exit 0
+            fi
+            if [[ "$attempt" -eq 3 ]]; then
+              echo "Could not publish preview after ${attempt} attempts." >&2
+              exit 1
+            fi
+            echo "Pages changed during publish; rebasing attempt ${attempt}."
+            git pull --rebase origin gh-pages
+          done
       - name: Add preview link to pull request
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

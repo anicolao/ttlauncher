@@ -26,7 +26,11 @@ Playwright evidence.
 | [Implementation plan](docs/IMPLEMENTATION_PLAN.md) | Sequenced PRs and their exit criteria |
 | [Decision records](docs/adr/README.md) | Durable architecture decisions |
 
-## Interactive preview
+## Deployments
+
+Every change pushed to `main` is deployed after repository validation to:
+
+<https://anicolao.github.io/ttlauncher/>
 
 Every same-repository pull request builds the launcher in read-only live mode at
 a PR-specific GitHub Pages path and posts the link on the PR. It authenticates

@@ -55,10 +55,17 @@ smoke checks verify:
 
 ## GitHub Pages setup and cleanup
 
-Pages is served from `gh-pages` at `/`. The workflow validates the numeric PR
-number, removes exactly that tracked `pr-N` directory with `git rm`, rebuilds it,
-and commits only that path. Other PR directories coexist untouched.
-Same-repository PRs deploy; forks validate only.
+Pages is served from `gh-pages` at `/`. After all application-quality jobs pass
+for a push to `main`, the production build replaces the branch root and is
+available at `https://anicolao.github.io/ttlauncher/`. That publish preserves
+the `.nojekyll` file, repository license, optional custom-domain file, and every
+numeric `pr-N` directory.
+
+The preview workflow validates the numeric PR number, removes exactly that
+tracked `pr-N` directory with `git rm`, rebuilds it, and commits only that path.
+Other PR directories and the production root coexist untouched. Production and
+preview publishes rebase and retry if another deployment updates `gh-pages`
+first. Same-repository PRs deploy; forks validate only.
 
 Closed-PR cleanup is a follow-up that deletes exactly `pr-<number>` after numeric
 validation. Until then, static preview directories can remain harmlessly on the
@@ -78,7 +85,8 @@ Pages branch.
 
 ## Production separation
 
-A PR preview is not a production release. Promotion is a separate protected
-workflow using a CI-verified artifact and retaining the preceding Hosting release
-for rollback. Live-read proves data compatibility only; physical-table acceptance
-remains mandatory before promotion.
+A PR preview is not a production release. Only a validated push to `main`
+updates the production root, using the same public Firebase web configuration
+and silent anonymous read path as live-read previews. The `gh-pages` history
+retains the preceding build for rollback. Live-read proves data compatibility
+only; physical-table acceptance remains mandatory before promotion.

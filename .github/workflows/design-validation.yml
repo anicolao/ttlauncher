@@ -1,4 +1,4 @@
-name: Application quality
+name: Application quality and deployment
 
 on:
   pull_request:
@@ -77,3 +77,85 @@ jobs:
           path: |
             test-results/
             playwright-report/
+
+  deploy:
+    needs: [static, firebase-rules, e2e]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+    concurrency:
+      group: gh-pages-production
+      cancel-in-progress: true
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          path: source
+      - name: Check out Pages branch
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: pages-output
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: source/package-lock.json
+      - name: Build production launcher
+        working-directory: source
+        env:
+          PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
+          PUBLIC_DATA_MODE: firebase
+          PUBLIC_FIREBASE_API_KEY: ${{ secrets.PUBLIC_FIREBASE_API_KEY }}
+          PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ secrets.PUBLIC_FIREBASE_AUTH_DOMAIN }}
+          PUBLIC_FIREBASE_PROJECT_ID: ${{ secrets.PUBLIC_FIREBASE_PROJECT_ID }}
+          PUBLIC_FIREBASE_STORAGE_BUCKET: ${{ secrets.PUBLIC_FIREBASE_STORAGE_BUCKET }}
+          PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
+          PUBLIC_FIREBASE_APP_ID: ${{ secrets.PUBLIC_FIREBASE_APP_ID }}
+        run: |
+          for variable in PUBLIC_FIREBASE_API_KEY PUBLIC_FIREBASE_AUTH_DOMAIN PUBLIC_FIREBASE_PROJECT_ID PUBLIC_FIREBASE_APP_ID; do
+            if [[ -z "${!variable}" ]]; then
+              echo "Required production configuration is missing: ${variable}" >&2
+              exit 1
+            fi
+          done
+          npm ci
+          npm run build
+      - name: Assemble production site
+        working-directory: pages-output
+        run: |
+          rsync -a --delete \
+            --exclude='.git' \
+            --exclude='.nojekyll' \
+            --exclude='CNAME' \
+            --exclude='LICENSE' \
+            --exclude='pr-[0-9]*/' \
+            ../source/build/ ./
+          touch .nojekyll
+      - name: Publish production site
+        working-directory: pages-output
+        env:
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Production site is already current."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Deploy main at ${SOURCE_SHA}"
+          for attempt in 1 2 3; do
+            if git push; then
+              exit 0
+            fi
+            if [[ "$attempt" -eq 3 ]]; then
+              echo "Could not publish production after ${attempt} attempts." >&2
+              exit 1
+            fi
+            echo "Pages changed during publish; rebasing attempt ${attempt}."
+            git pull --rebase origin gh-pages
+          done
