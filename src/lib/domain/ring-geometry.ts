@@ -5,6 +5,7 @@ export interface RingPosition {
   xPercent: number;
   yPercent: number;
   rotation: number;
+  shellRotation: number;
   edge: Edge;
 }
 
@@ -16,11 +17,14 @@ export function ringPosition(index: number, count: number, ringAngle = 0): RingP
   const safeCount = Math.max(1, count);
   const angle = normalizeAngle(-90 + (index * 360) / safeCount + ringAngle);
   const radians = (angle * Math.PI) / 180;
+  const shellRotation = normalizeSignedAngle(angle - 90);
+  const rotation = normalizeSignedAngle(90 - angle);
   return {
     angle,
-    xPercent: 50 + Math.cos(radians) * 35.5,
-    yPercent: 50 + Math.sin(radians) * 31,
-    rotation: normalizeSignedAngle(90 - angle),
+    xPercent: 50 + Math.cos(radians) * 19,
+    yPercent: 50 + Math.sin(radians) * 34,
+    rotation,
+    shellRotation,
     edge: nearestEdge(angle)
   };
 }

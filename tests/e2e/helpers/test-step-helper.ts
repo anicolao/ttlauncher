@@ -51,14 +51,46 @@ export class TestStepHelper {
       expect(rectangle.y + rectangle.height).toBeLessThanOrEqual(1080);
     }
 
-    const obstacles = this.page.locator('.center-shell, [data-handle]');
-    for (let tileIndex = 0; tileIndex < await tiles.count(); tileIndex++) {
-      const tile = await requiredBox(tiles.nth(tileIndex));
-      for (let obstacleIndex = 0; obstacleIndex < await obstacles.count(); obstacleIndex++) {
-        const obstacle = await requiredBox(obstacles.nth(obstacleIndex));
-        expect(overlaps(tile, obstacle)).toBe(false);
-      }
-    }
+    const renderedCollisions = await tiles.evaluateAll((tileElements) => {
+      const obstacles = [...document.querySelectorAll<HTMLElement>('.center-shell, [data-handle]')];
+      const labels = (element: Element) =>
+        element.getAttribute('data-game-id') ??
+        element.getAttribute('data-handle') ??
+        element.className.toString();
+
+      return tileElements.flatMap((tile) => {
+        const tileRectangle = tile.getBoundingClientRect();
+        return obstacles.flatMap((obstacle) => {
+          const obstacleRectangle = obstacle.getBoundingClientRect();
+          const left = Math.max(tileRectangle.left, obstacleRectangle.left);
+          const right = Math.min(tileRectangle.right, obstacleRectangle.right);
+          const top = Math.max(tileRectangle.top, obstacleRectangle.top);
+          const bottom = Math.min(tileRectangle.bottom, obstacleRectangle.bottom);
+          if (left >= right || top >= bottom) return [];
+
+          // Rotated, clipped wedges have large transparent corners in their
+          // axis-aligned bounding boxes. Sample the intersection through the
+          // browser's hit-testing so only the rendered/tappable trapezoid counts.
+          const xCoordinates = [left + 1, (left + right) / 2, right - 1];
+          const yCoordinates = [top + 1, (top + bottom) / 2, bottom - 1];
+          for (let x = left + 6; x < right; x += 12) xCoordinates.push(x);
+          for (let y = top + 6; y < bottom; y += 12) yCoordinates.push(y);
+
+          for (const x of xCoordinates) {
+            for (const y of yCoordinates) {
+              const stack = document.elementsFromPoint(x, y);
+              const hitsTile = stack.some((element) => element === tile || tile.contains(element));
+              const hitsObstacle = stack.some(
+                (element) => element === obstacle || obstacle.contains(element)
+              );
+              if (hitsTile && hitsObstacle) return [`${labels(tile)} overlaps ${labels(obstacle)}`];
+            }
+          }
+          return [];
+        });
+      });
+    });
+    expect(renderedCollisions).toEqual([]);
   }
 }
 
@@ -66,16 +98,4 @@ async function requiredBox(locator: Locator) {
   const rectangle = await locator.boundingBox();
   expect(rectangle).not.toBeNull();
   return rectangle!;
-}
-
-function overlaps(
-  left: { x: number; y: number; width: number; height: number },
-  right: { x: number; y: number; width: number; height: number }
-) {
-  return !(
-    left.x + left.width <= right.x ||
-    right.x + right.width <= left.x ||
-    left.y + left.height <= right.y ||
-    right.y + right.height <= left.y
-  );
 }

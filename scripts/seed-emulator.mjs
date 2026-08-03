@@ -16,7 +16,7 @@ const batch = firestore.batch();
 for (const [id, title, icon] of applications) {
   batch.set(firestore.collection('Applications').doc(id), {
     Title: title,
-    Icon: `/icons/${icon}.svg`,
+    Icon: `/art/${icon}.png`,
     URL: `https://games.example.test/${id}`
   });
 }
