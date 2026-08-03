@@ -110,74 +110,93 @@ main.tabletop .orbit-inner {
 
 main.tabletop .game-ring { z-index: 3; }
 
+main.tabletop .game-position {
+  width: 25rem;
+  height: 25rem;
+}
+
+main.tabletop .game-position.gate-outgoing-forward {
+  clip-path: inset(0 0 var(--gate-progress) 0);
+}
+
+main.tabletop .game-position.gate-incoming-forward {
+  clip-path: inset(var(--gate-remainder) 0 0 0);
+}
+
+main.tabletop .game-position.gate-outgoing-reverse {
+  clip-path: inset(var(--gate-progress) 0 0 0);
+}
+
+main.tabletop .game-position.gate-incoming-reverse {
+  clip-path: inset(0 0 var(--gate-remainder) 0);
+}
+
+main.tabletop .game-position[class*='gate-'] { will-change: clip-path; }
+
 main.tabletop .catalogue-gate {
   position: absolute;
-  left: 42.7%;
-  top: 18.6%;
+  left: 69%;
+  top: 50%;
   z-index: 4;
-  width: clamp(10.5rem, 11vw, 13.5rem);
-  height: clamp(6.2rem, 11vh, 7.6rem);
-  transform: translate(-50%, -50%) rotate(-22.5deg);
+  width: clamp(15rem, 15vw, 18rem);
+  height: clamp(3.6rem, 7vh, 4.8rem);
+  transform: translate(-50%, -50%);
   pointer-events: auto;
-  border: .16rem solid rgba(94, 234, 241, .82);
-  border-radius: 2.8rem 2.8rem 1.1rem 1.1rem;
+  border: .16rem solid rgba(94, 234, 241, .88);
+  border-radius: .65rem;
   background:
-    linear-gradient(90deg, rgba(255, 225, 100, .85), transparent 12% 88%, rgba(255, 225, 100, .85)),
-    linear-gradient(#173a49, #06131c 72%);
+    linear-gradient(90deg, rgba(255, 225, 100, .9) 0 .3rem, transparent .3rem calc(100% - .3rem), rgba(255, 225, 100, .9) calc(100% - .3rem)),
+    repeating-linear-gradient(90deg, rgba(94, 234, 241, .12) 0 .2rem, transparent .2rem 1.5rem),
+    linear-gradient(#153744, #06131c 50%, #102d39);
   box-shadow:
-    0 0 0 .55rem rgba(3, 11, 17, .94),
-    0 0 0 .72rem rgba(255, 225, 100, .2),
-    0 0 1.4rem rgba(94, 234, 241, .5),
-    inset 0 -.9rem 1rem rgba(0, 0, 0, .82);
-  filter: drop-shadow(0 .7rem .55rem rgba(0, 0, 0, .8));
+    0 0 0 .5rem rgba(3, 11, 17, .96),
+    0 0 0 .65rem rgba(255, 225, 100, .2),
+    0 0 1.2rem rgba(94, 234, 241, .45),
+    inset 0 0 1rem rgba(0, 0, 0, .78);
 }
 
 main.tabletop .catalogue-gate::before {
   content: '';
   position: absolute;
-  inset: 1.15rem 1.45rem .75rem;
-  border: .2rem solid var(--gold);
-  border-radius: 2rem 2rem .65rem .65rem;
+  inset: .75rem .95rem;
+  border-top: .16rem solid var(--gold);
+  border-bottom: .16rem solid var(--cyan);
+  border-radius: .25rem;
   background:
-    radial-gradient(ellipse at 50% 115%, rgba(94, 234, 241, .25), transparent 55%),
-    linear-gradient(#02070b, #06131c 58%, #0d2935);
-  box-shadow:
-    inset 0 0 1.2rem #000,
-    0 0 .8rem rgba(255, 225, 100, .34);
+    linear-gradient(90deg, rgba(94, 234, 241, .2), transparent 16% 84%, rgba(255, 225, 100, .2)),
+    #02090e;
+  box-shadow: inset 0 0 .7rem #000;
 }
 
 main.tabletop .catalogue-gate::after {
   content: '';
   position: absolute;
   left: 50%;
-  bottom: -.7rem;
-  width: 82%;
-  height: 1.15rem;
+  top: -.5rem;
+  bottom: -.5rem;
+  width: .35rem;
   translate: -50% 0;
-  border-radius: 50%;
-  background: #02080d;
-  box-shadow: 0 -.15rem .55rem rgba(94, 234, 241, .42);
+  border-radius: .2rem;
+  background: var(--gold);
+  box-shadow: 0 0 .55rem var(--gold);
 }
 
 main.tabletop .catalogue-gate span {
   position: absolute;
-  left: 50%;
-  top: .45rem;
+  inset: .35rem 1.4rem;
   z-index: 1;
-  width: 42%;
-  height: .32rem;
-  translate: -50% 0;
-  border-radius: 999px;
-  background: var(--cyan);
-  box-shadow: 0 0 .65rem var(--cyan);
+  border-top: .12rem solid rgba(167, 249, 247, .8);
+  border-bottom: .12rem solid rgba(167, 249, 247, .35);
+  border-radius: .25rem;
 }
 
 main.tabletop .catalogue-gate i {
   position: absolute;
-  left: .65rem;
-  bottom: 1rem;
+  left: .6rem;
+  top: 50%;
   z-index: 1;
   width: .5rem;
+  translate: 0 -50%;
   aspect-ratio: 1;
   border-radius: 50%;
   background: var(--gold);
@@ -201,6 +220,11 @@ main.tabletop .game-tile {
   filter: drop-shadow(0 .6rem .45rem rgba(0, 0, 0, .68));
   isolation: isolate;
   clip-path: url('#rounded-game-token');
+}
+
+main.tabletop .game-position .game-tile {
+  left: 50%;
+  top: 50%;
 }
 
 main.tabletop .game-tile::before,

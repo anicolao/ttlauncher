@@ -80,8 +80,9 @@ validated with physical-device tests, not assumed from a desktop monitor.
 
 The ring is an eight-slot viewport over an unbounded sequence index. Catalogue
 lookup normalizes that index modulo game count, so a final partial group is
-filled by the first games without changing spacing. A fixed gate covers the
-boundary between slots seven and zero. The center logo is a paging button only
+filled by the first games without changing spacing. A fixed top-down gate lies
+on the right-side radial axis and covers the boundary between slots seven and
+zero at three o’clock. The center logo is a paging button only
 when `ceil(gameCount / 8) > 1`; activating it animates forward to the next
 original-catalogue boundary (`0`, `8`, `16`, …) and never launches a URL. Four
 outward-facing page counters surround it. Equivalent drag handles appear at
@@ -96,9 +97,10 @@ Use Pointer Events and pointer capture.
 2. Movement below an implementation-tuned physical threshold retains tap intent.
 3. Movement beyond threshold cancels tap intent and rotates the ring. Each 45°
    of accumulated motion advances or reverses the sequence by one game. Seven
-   keyed tokens retain continuous positions while the gate hides removal of the
-   outgoing token and insertion of the incoming token. Residual angle remains
-   visible. Velocity may later produce restrained inertia.
+   keyed tokens retain continuous positions. The outgoing token and the next
+   absolute-sequence occurrence share the eighth trajectory inside screen-aligned
+   wrapper clips; the radial wiper covers their complementary clip edge. Residual
+   angle remains visible. Velocity may later produce restrained inertia.
 4. `pointerup` on the same valid tile with tap intent launches exactly once.
 5. A second pointer must not cause duplicate launch. The simplest v1 policy is
    to lock ring movement to the first active pointer while allowing independent

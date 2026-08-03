@@ -30,7 +30,7 @@ profile, or settings. The game owns the experience after the tap.
 
 The implementation reference is an edge-to-edge radial carousel:
 
-- a fixed, text-free tunnel bridges one seam in the game track;
+- a fixed, text-free radial wiper bridges the right-side seam in the game track;
 - spinning streams one game through the tunnel for every 45 degrees of travel;
 - a center-logo tap animates forward to the next eight-game boundary;
 - large icon/title tiles form a broad ring around it;
@@ -46,9 +46,10 @@ contrast, and deterministic design tokens.
 The runnable surface intentionally matches its defining relationships:
 a circular segmented wheel rather than floating rectangular cards, illustrated
 game emblems within deep wedge-shaped tokens, layered cyan/gold orbital rails, a
-large central crest, one illuminated tunnel mouth, and bezel-mounted controls.
-The tunnel is a rotationally neutral, text-free piece of track infrastructure,
-not a privileged approach-side control. The tokens use continuously rounded
+large central crest, one illuminated radial wiper, and bezel-mounted controls.
+The wiper is a text-free piece of track infrastructure drawn orthographically
+from above, not a perspective object lying on the table and not an approach-side
+control. The tokens use continuously rounded
 corners like physical inserts rather than sharp polygon joints. Fixture
 illustration richness is representative; the live preview renders the existing
 catalogue's own `Icon` values.
@@ -67,9 +68,10 @@ parallax, sleeve/palm rejection, glare, and comfortable reach.
 1. The table wakes into the game ring; auth and catalogue loading are invisible
    infrastructure unless they fail.
 2. A person recognizes an icon/title near their edge.
-3. If necessary, they spin a handle, tile, tunnel, or safe empty track. Each game
-   crossing into the tunnel vanishes while the next catalogue game emerges from
-   its other mouth. A center tap spins forward to the next eight-game boundary.
+3. If necessary, they spin a handle, tile, wiper, or safe empty track. At the
+   three-o’clock seam, the outgoing game is progressively clipped on one side of
+   the wiper while its successor is revealed under the complementary clip on the
+   other. A center tap spins forward to the next eight-game boundary.
 4. They touch a game tile. The tile shows a pressed outline within 50 ms.
 5. Releasing without a drag opens the game URL exactly once.
 6. The launcher is gone; the target game is responsible for orientation, players,
@@ -122,12 +124,15 @@ not exposed as a button; all four indicators show `1 / 1`.
 - Treat the alphabetically ordered catalogue as an infinite wrapping sequence.
   A final partial group continues with game zero, so 14 games produce the second
   boundary view `8, 9, 10, 11, 12, 13, 0, 1`.
-- Sequence entries use absolute occurrence keys. When a 45-degree threshold is
-  crossed, the seven retained DOM tiles stay on their continuous trajectories;
-  only the game hidden by the tunnel is removed and only its successor is added.
-- The fixed gate covers the seam between ring slots seven and zero. Initially
-  game zero sits at its outgoing mouth. Clockwise motion sends it inside while
-  game eight emerges at the incoming mouth.
+- Sequence entries use absolute occurrence keys. During a partial 45-degree step,
+  the seven retained DOM tiles stay on continuous trajectories. Outgoing and
+  incoming occurrences are overlaid on the eighth trajectory and clipped into
+  complementary screen-space halves, so both are visible without creating a
+  ninth slot. At the threshold only the hidden outgoing occurrence is removed.
+- The gate is a horizontal bar on the right side of the disc, extending radially
+  from center toward the outer edge. It is rendered as a flat top-down wiper over
+  the seam between slots seven and zero. Initially game zero sits above its
+  outgoing edge; clockwise motion wipes it away while game eight appears below.
 - Tapping the center moves forward to the next boundary at catalogue indices
   `0`, `8`, `16`, and so on. The final boundary wraps at the actual list end.
 - Title order is stable and alphabetical so a host can learn the shelf.

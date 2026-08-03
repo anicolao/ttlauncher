@@ -153,7 +153,7 @@ Every pointer path asserts command count, not just final URL:
 | Gesture | Expected result |
 | --- | --- |
 | Down/up inside one tile below threshold | Exactly one launch command |
-| Down, cross one 45° step, up over same tile | One game exits and one enters; zero launches |
+| Down through a partial 45° step | Outgoing and incoming games are both clipped by the right-side wiper; zero launches |
 | Down on tile, release outside below/at cancellation rule | Zero launches |
 | Down then `pointercancel` | State resets; zero launches |
 | Drag handle/empty track | Eight-slot window streams through the tunnel; zero launches |
@@ -192,7 +192,7 @@ invalid scheme, popup-blocked/error feedback, and exactly-once dispatch.
 | --- | --- | --- |
 | 001 | Tabletop shell | full-screen no-top layout, loading/current, no scroll |
 | 002 | Anonymous auth | invisible first session, reload restore, auth failure perimeter |
-| 003 | Catalogue/paging | legacy parsing/order, fixed 8 slots, tunnel replacement, animated boundaries, wrap |
+| 003 | Catalogue/paging | fixed 8 slots, radial wiper, dual clipped transition, animated boundaries, wrap |
 | 004 | Omnidirectional launch | same fixture from N/E/S/W/corner, immediate safe URL |
 | 005 | Swipe/arbitration | handles, empty track, tile drag, thresholds, cancel, settle |
 | 006 | Resilience | cached offline ring, reconnect, empty, permission/error retry |
