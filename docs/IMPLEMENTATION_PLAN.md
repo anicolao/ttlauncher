@@ -70,7 +70,7 @@ zones are equivalent; canonical zero-pixel baselines are approved.
 
 ## Increment 5 — touch hardening
 
-- Extend the delivered Pointer Events/capture/current-page drag with explicit
+- Extend the delivered Pointer Events/capture/continuous-page drag with explicit
   release-outside, pointer-cancel, threshold-boundary, and multi-pointer coverage.
 - Define physical tap/drag threshold and reduced-motion behavior.
 - Add just-below/above threshold, tile-origin drag, handle, empty-track, settle,
@@ -127,7 +127,7 @@ physical four-side checklist is recorded, and rollback is proven.
 | --- | --- |
 | A conventional “top” leaks into UI | Geometry assertions and four-side screenshots |
 | Tap becomes drag or duplicate launch | Pointer reducer plus threshold/exactly-once matrix |
-| Too many games shrink targets | Stable pages of eight; center tap advances; swipe repositions current page |
+| Too many games shrink targets | Stable pages of eight; center tap advances; 45° swipe steps browse and wrap |
 | Rotated titles are hard to read | Physical test continuous radial vs four-band snapping |
 | Multi-touch corrupts ring state | Pointer capture policy and simultaneous-hand tests |
 | Legacy malformed record | Runtime parser, safe omission/fallback |

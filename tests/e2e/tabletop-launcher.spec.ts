@@ -12,6 +12,30 @@ async function openLauncher(page: Page) {
   return surface;
 }
 
+async function dragTileBy(page: Page, accessibleName: string, degrees: number) {
+  const tileBox = await page.getByRole('button', { name: accessibleName }).boundingBox();
+  const surfaceBox = await page.locator('[data-e2e-layout]').boundingBox();
+  expect(tileBox).not.toBeNull();
+  expect(surfaceBox).not.toBeNull();
+
+  const centerX = surfaceBox!.x + surfaceBox!.width / 2;
+  const centerY = surfaceBox!.y + surfaceBox!.height / 2;
+  const startX = tileBox!.x + tileBox!.width / 2;
+  const startY = tileBox!.y + tileBox!.height / 2;
+  const radius = Math.hypot(startX - centerX, startY - centerY);
+  const startAngle = Math.atan2(startY - centerY, startX - centerX);
+  const endAngle = startAngle + (degrees * Math.PI) / 180;
+
+  await page.mouse.move(startX, startY);
+  await page.mouse.down();
+  await page.mouse.move(
+    centerX + Math.cos(endAngle) * radius,
+    centerY + Math.sin(endAngle) * radius,
+    { steps: 8 }
+  );
+  await page.mouse.up();
+}
+
 test('renders one fixed omnidirectional surface with safe geometry', async ({ page }, testInfo) => {
   const surface = await openLauncher(page);
   const steps = new TestStepHelper(page, testInfo);
@@ -114,25 +138,22 @@ test('launches directly from north, east, south, west, and a corner', async ({ p
   });
 });
 
-test('dragging a tile rotates the current page and never launches it', async ({ page }, testInfo) => {
+test('dragging a tile continuously browses later pages and never launches it', async ({ page }, testInfo) => {
   await openLauncher(page);
   const steps = new TestStepHelper(page, testInfo);
   const tile = page.getByRole('button', { name: 'Launch Aurora Lines' });
-  const before = await tile.getAttribute('data-angle');
-  const box = await tile.boundingBox();
-  expect(box).not.toBeNull();
   let popupCount = 0;
   page.on('popup', () => popupCount++);
 
-  await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2);
-  await page.mouse.down();
-  await page.mouse.move(box!.x + box!.width / 2 + 90, box!.y + box!.height / 2 + 45, { steps: 4 });
-  await page.mouse.up();
+  await dragTileBy(page, 'Launch Aurora Lines', 60);
 
-  await expect(tile).not.toHaveAttribute('data-angle', before!);
+  await expect(page.getByRole('button', { name: 'Launch Aurora Lines' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Launch Hearthland' })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Show next games/ }))
+    .toHaveAccessibleName('Show next games, page 3 of 3');
   expect(popupCount).toBe(0);
 
-  const movedBox = await tile.boundingBox();
+  const movedBox = await page.getByRole('button', { name: 'Launch Hearthland' }).boundingBox();
   expect(movedBox).not.toBeNull();
   await page.mouse.move(movedBox!.x + 2, movedBox!.y + movedBox!.height / 2);
   await page.mouse.down();
@@ -140,8 +161,19 @@ test('dragging a tile rotates the current page and never launches it', async ({ 
   await page.mouse.up();
   expect(popupCount).toBe(0);
 
-  await steps.step('ring-rotated', {
+  await steps.step('ring-browsed', {
     screenshot: 'rotated-page.png',
     verifications: [() => expect(popupCount).toBe(0)]
   });
+
+  await dragTileBy(page, 'Launch Hearthland', -60);
+  await expect(tile).toBeVisible();
+  await expect(page.getByRole('button', { name: /Show next games/ }))
+    .toHaveAccessibleName('Show next games, page 2 of 3');
+
+  await dragTileBy(page, 'Launch Aurora Lines', -60);
+  await expect(page.getByRole('button', { name: 'Launch Tidelines' })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Show next games/ }))
+    .toHaveAccessibleName('Show next games, page 1 of 3');
+  expect(popupCount).toBe(0);
 });

@@ -91,8 +91,9 @@ Use Pointer Events and pointer capture.
 1. `pointerdown` records pointer ID, start coordinate, target tile if any, time,
    and current ring angle.
 2. Movement below an implementation-tuned physical threshold retains tap intent.
-3. Movement beyond threshold cancels tap intent and rotates the ring; velocity
-   may produce restrained inertial settling.
+3. Movement beyond threshold cancels tap intent and rotates the ring. Each 45°
+   of accumulated motion advances or reverses one page, with modular wrap;
+   residual angle remains visible. Velocity may later produce restrained inertia.
 4. `pointerup` on the same valid tile with tap intent launches exactly once.
 5. A second pointer must not cause duplicate launch. The simplest v1 policy is
    to lock ring movement to the first active pointer while allowing independent
@@ -109,7 +110,8 @@ Reduced motion removes inertial settling; direct drag remains available.
 4. Adapter emits valid `GameTile` values and bounded diagnostics.
 5. The catalogue is split into stable pages of eight; geometry lays the current
    page around the ring.
-6. Swiping repositions only the current page; center activation loads the next.
+6. Each 45° swipe step loads the next or previous page and wraps; center
+   activation is the one-tap next-page shortcut.
 7. A stationary tile tap revalidates its `https:` URL and opens it with
    `noopener,noreferrer`.
 8. The target game owns every subsequent screen and interaction.

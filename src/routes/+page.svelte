@@ -8,7 +8,7 @@
   import { createFixtureCatalogue } from '$lib/data/fixture-catalogue';
   import { createFirebaseCatalogue } from '$lib/data/firebase-catalogue';
   import type { GameTile } from '$lib/domain/game-tile';
-  import { gamesForPage, nextPage, pageCount } from '$lib/domain/pagination';
+  import { gamesForPage, nextPage, normalizePage, pageCount } from '$lib/domain/pagination';
   import {
     angleFromPoint,
     ringPosition,
@@ -16,6 +16,7 @@
   } from '$lib/domain/ring-geometry';
 
   const TAP_THRESHOLD = 18;
+  const PAGE_SPIN_STEP = 45;
   let snapshot: CatalogueSnapshot = {
     status: 'loading',
     games: [],
@@ -28,8 +29,7 @@
     pointerId: number;
     startX: number;
     startY: number;
-    startAngle: number;
-    startRingAngle: number;
+    lastAngle: number;
     gameId: string | null;
     moved: boolean;
   } | null = null;
@@ -79,8 +79,7 @@
       pointerId: event.pointerId,
       startX: event.clientX,
       startY: event.clientY,
-      startAngle: angleFromPoint(event.clientX, event.clientY, bounds.left + bounds.width / 2, bounds.top + bounds.height / 2),
-      startRingAngle: ringAngle,
+      lastAngle: angleFromPoint(event.clientX, event.clientY, bounds.left + bounds.width / 2, bounds.top + bounds.height / 2),
       gameId: tile?.dataset.gameId ?? null,
       moved: false
     };
@@ -99,7 +98,18 @@
       bounds.left + bounds.width / 2,
       bounds.top + bounds.height / 2
     );
-    ringAngle = drag.startRingAngle + shortestAngleDelta(drag.startAngle, current);
+    ringAngle += shortestAngleDelta(drag.lastAngle, current);
+    drag.lastAngle = current;
+
+    if (!hasPages) return;
+    while (ringAngle >= PAGE_SPIN_STEP) {
+      pageIndex = normalizePage(pageIndex + 1, snapshot.games.length);
+      ringAngle -= PAGE_SPIN_STEP;
+    }
+    while (ringAngle <= -PAGE_SPIN_STEP) {
+      pageIndex = normalizePage(pageIndex - 1, snapshot.games.length);
+      ringAngle += PAGE_SPIN_STEP;
+    }
   }
 
   function pointerUp(event: PointerEvent) {
@@ -232,7 +242,6 @@
         onpointerdown={(event) => event.stopPropagation()}
       >
         <span class="logo-mark" aria-hidden="true"><i></i><i></i><i></i></span>
-        <span class="brand-name" aria-hidden="true">TABLE TOP<br /><b>LAUNCHER</b></span>
         {#each ['north', 'east', 'south', 'west'] as edge}
           <span class="page-count {edge}" aria-hidden="true">{pageLabel}</span>
         {/each}
@@ -240,7 +249,9 @@
     {:else}
       <div class="center-logo inert" aria-hidden="true">
         <span class="logo-mark"><i></i><i></i><i></i></span>
-        <span class="brand-name">TABLE TOP<br /><b>LAUNCHER</b></span>
+        {#each ['north', 'east', 'south', 'west'] as edge}
+          <span class="page-count {edge}">{pageLabel}</span>
+        {/each}
       </div>
     {/if}
   </div>
@@ -332,8 +343,6 @@
   .logo-mark i { position: absolute; inset: .65rem; border: 2px solid #67dbe7; }
   .logo-mark i:nth-child(2) { inset: 0; border-color: #ffe45c; }
   .logo-mark i:nth-child(3) { inset: 1.3rem; border-color: #f5fbfc; }
-  .brand-name { font-size: clamp(.7rem, .85vw, .95rem); letter-spacing: .32em; line-height: 1.45; }
-  .brand-name b { color: #ffe45c; font-size: 1.25em; }
   .page-count { position: absolute; font-size: clamp(.65rem, .7vw, .8rem); font-weight: 700; letter-spacing: .12em; color: #9fc2ca; }
   .page-count.north { top: .8rem; left: 50%; transform: translateX(-50%) rotate(180deg); }
   .page-count.east { right: .8rem; top: 50%; transform: translateY(-50%) rotate(-90deg); }

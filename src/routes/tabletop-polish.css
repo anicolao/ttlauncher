@@ -167,10 +167,10 @@ main.tabletop .game-tile.pressed::before { background: var(--coral); }
 
 main.tabletop .game-tile .tile-art {
   position: absolute;
-  left: 12%;
-  top: 8%;
-  width: 76%;
-  height: 74%;
+  left: 18%;
+  top: 12%;
+  width: 64%;
+  height: 64%;
   min-height: 0;
   border-radius: 0;
   overflow: visible;
@@ -186,7 +186,7 @@ main.tabletop .game-tile .tile-art img {
 }
 
 main.tabletop .game-tile .icon-fallback {
-  width: 62%;
+  width: 54%;
   font-size: 2.1rem;
 }
 
@@ -246,8 +246,8 @@ main.tabletop button.center-logo:focus-visible {
 }
 
 main.tabletop .logo-mark {
-  width: 5.7rem;
-  height: 5rem;
+  width: 7rem;
+  height: 6.15rem;
   filter: drop-shadow(0 0 .45rem rgba(94, 234, 241, .5));
 }
 
@@ -260,13 +260,6 @@ main.tabletop .logo-mark::after {
   border-right: 1px solid rgba(255, 255, 255, .35);
 }
 main.tabletop .logo-mark::after { transform: rotate(90deg); }
-
-main.tabletop .brand-name {
-  font-size: clamp(.75rem, .94vw, 1rem);
-  letter-spacing: .42em;
-  line-height: 1.55;
-}
-main.tabletop .brand-name b { color: var(--gold); letter-spacing: .32em; }
 
 main.tabletop .page-count { color: #cbf8f6; opacity: .72; }
 
