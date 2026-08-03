@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" role="img" aria-label="Dice and daggers">
+  <path d="m38 98 51-67 14 11-51 67z" fill="#dff9ff"/><path d="m72 39 21-20 7 6-11 22z" fill="#ffe45c"/>
+  <path d="m118 98-51-67-14 11 51 67z" fill="#9feaf1"/><path d="m88 39-21-20-7 6 11 22z" fill="#ff765f"/>
+  <rect x="62" y="66" width="36" height="36" rx="7" transform="rotate(45 80 84)" fill="#0c202b" stroke="#ffe45c" stroke-width="5"/>
+  <g fill="#f5fbfc"><circle cx="72" cy="76" r="3"/><circle cx="88" cy="92" r="3"/><circle cx="88" cy="76" r="3"/><circle cx="72" cy="92" r="3"/></g>
+</svg>
