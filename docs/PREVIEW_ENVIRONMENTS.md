@@ -12,10 +12,10 @@ The workflow validates the package, publishes a PR-specific directory on
 `gh-pages`, and updates one bot comment. Concurrent pushes to the same PR cancel
 the older deployment.
 
-This PR previews the runnable omnidirectional launcher with 18 bundled fixture
-games. Reviewers can rotate the current ring, tap the center through three pages,
-and exercise direct launch into a bundled fixture-game handoff without connecting
-to Firebase.
+This PR previews the runnable omnidirectional launcher against the existing
+LauncherUI `Applications` catalogue. Reviewers can rotate the current ring, page
+through the current production game count, and exercise the real launch URLs.
+Authentication is anonymous and silent; the client has no Firestore write path.
 
 ## Application preview modes
 
@@ -23,8 +23,8 @@ Preview builds declare a mode in four small edge-facing labels:
 
 | Mode | Source | Auth | Writes | Use |
 | --- | --- | --- | --- | --- |
-| `fixture` (default) | Versioned local catalogue | In-memory/emulated ready state | None | Ordinary and fork-safe visual review |
-| `live-read` | Existing LauncherUI Firestore | Real anonymous Firebase auth | None | Trusted compatibility review |
+| `fixture` | Versioned local catalogue | In-memory ready state | None | Validation builds and fork-safe visual review |
+| `live-read` (same-repository PR default) | Existing LauncherUI Firestore | Real anonymous Firebase auth | None | Trusted compatibility review |
 | `emulator` | Local Firebase emulators | Auth emulator | None | Developer and automated E2E |
 | `production` | Existing LauncherUI Firebase | Real anonymous auth | None | Released table only |
 
@@ -45,7 +45,7 @@ smoke checks verify:
 
 ## Secrets and trust boundary
 
-- Fixture previews require only `GITHUB_TOKEN`.
+- Fixture validation builds require only `GITHUB_TOKEN`.
 - Live-read is allowed only for branches in this repository, never forks, and
   uses repository/environment secrets for public Firebase web configuration.
 - Do not give previews service-account keys or Firebase Admin access.
@@ -67,8 +67,8 @@ Pages branch.
 
 - Bot URL, application assets, and nested static icons return HTTP 200.
 - Relative assets work at nested `/pr-N/` paths.
-- The page visibly states fixture mode from all four edges.
-- Center-logo taps advance pages `1 / 3`, `2 / 3`, `3 / 3`, then wrap.
+- The page reports catalogue readiness from all four edges.
+- Center-logo taps advance through the production-sized catalogue and wrap.
 - Ring drags move the current page and do not launch a game.
 - Same-PR updates preserve other preview directories.
 - Failed validation never deploys.

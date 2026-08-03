@@ -28,8 +28,10 @@ Playwright evidence.
 
 ## Interactive preview
 
-Every same-repository pull request builds the launcher in fixture mode at a
-PR-specific GitHub Pages path and posts the link on the PR. PR 1 is available at:
+Every same-repository pull request builds the launcher in read-only live mode at
+a PR-specific GitHub Pages path and posts the link on the PR. It authenticates
+anonymously and displays the existing LauncherUI `Applications` catalogue. PR 1
+is available at:
 
 <https://anicolao.github.io/ttlauncher/pr-1/>
 
@@ -46,5 +48,6 @@ npm run test:e2e
 
 - Product code: runnable vertical slice in this PR
 - Backend: reuse the existing LauncherUI Firebase project
-- Preview data: deterministic local fixture; no production connection
+- Preview data: existing LauncherUI Firebase catalogue through anonymous auth;
+  validation and E2E remain deterministic and emulator-only
 - License: [GNU GPL version 3](LICENSE)

@@ -170,6 +170,13 @@
   onpointerup={pointerUp}
   onpointercancel={pointerCancel}
 >
+  <svg class="shape-definitions" aria-hidden="true" width="0" height="0" focusable="false">
+    <defs>
+      <clipPath id="rounded-game-token" clipPathUnits="objectBoundingBox">
+        <path d="M .2,.015 Q .16,.015 .145,.07 L .006,.89 Q -.003,.948 .055,.975 Q .5,1 .945,.975 Q 1.003,.948 .994,.89 L .855,.07 Q .84,.015 .8,.015 Z" />
+      </clipPath>
+    </defs>
+  </svg>
   <div class="ambient-grid" aria-hidden="true"></div>
   <div class="wheel-halo" aria-hidden="true"></div>
   <div class="wheel-bezel" aria-hidden="true"><i></i><i></i><i></i></div>
