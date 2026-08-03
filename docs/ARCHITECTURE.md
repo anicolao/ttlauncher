@@ -78,9 +78,12 @@ screen space while preserving perceptual reach. Tile orientation may snap into
 four edge bands if continuous radial text harms legibility; that decision is
 validated with physical-device tests, not assumed from a desktop monitor.
 
-The center logo is a paging button only when `ceil(gameCount / 8) > 1`.
-Activating it advances `(pageIndex + 1) % pageCount`, resets the presentation
-angle to its deterministic page-entry value, and never launches a URL. Four
+The ring is an eight-slot viewport over an unbounded sequence index. Catalogue
+lookup normalizes that index modulo game count, so a final partial group is
+filled by the first games without changing spacing. A fixed gate covers the
+boundary between slots seven and zero. The center logo is a paging button only
+when `ceil(gameCount / 8) > 1`; activating it animates forward to the next
+original-catalogue boundary (`0`, `8`, `16`, …) and never launches a URL. Four
 outward-facing page counters surround it. Equivalent drag handles appear at
 north, east, south, and west. There is no global header or top-origin panel.
 
@@ -92,8 +95,10 @@ Use Pointer Events and pointer capture.
    and current ring angle.
 2. Movement below an implementation-tuned physical threshold retains tap intent.
 3. Movement beyond threshold cancels tap intent and rotates the ring. Each 45°
-   of accumulated motion advances or reverses one page, with modular wrap;
-   residual angle remains visible. Velocity may later produce restrained inertia.
+   of accumulated motion advances or reverses the sequence by one game. Seven
+   keyed tokens retain continuous positions while the gate hides removal of the
+   outgoing token and insertion of the incoming token. Residual angle remains
+   visible. Velocity may later produce restrained inertia.
 4. `pointerup` on the same valid tile with tap intent launches exactly once.
 5. A second pointer must not cause duplicate launch. The simplest v1 policy is
    to lock ring movement to the first active pointer while allowing independent
@@ -108,10 +113,12 @@ Reduced motion removes inertial settling; direct drag remains available.
 2. Gateway may expose a compatible cached catalogue, marked stale/offline.
 3. Gateway subscribes to ordered `Applications`.
 4. Adapter emits valid `GameTile` values and bounded diagnostics.
-5. The catalogue is split into stable pages of eight; geometry lays the current
-   page around the ring.
-6. Each 45° swipe step loads the next or previous page and wraps; center
-   activation is the one-tap next-page shortcut.
+5. The catalogue adapter supplies a wrapping eight-entry window keyed by absolute
+   sequence index; geometry lays those entries around the ring in reverse slot
+   order so the gate joins the outgoing and incoming ends.
+6. Each 45° swipe step replaces exactly one entry. Center activation animates in
+   the forward direction until the next eight-game catalogue boundary reaches
+   the outgoing tunnel mouth.
 7. A stationary tile tap revalidates its `https:` URL and opens it with
    `noopener,noreferrer`.
 8. The target game owns every subsequent screen and interaction.

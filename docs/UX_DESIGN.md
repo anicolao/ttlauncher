@@ -30,8 +30,9 @@ profile, or settings. The game owns the experience after the tap.
 
 The implementation reference is an edge-to-edge radial carousel:
 
-- a center logo advances to the next page of games when more than eight exist;
-- spinning the ring continuously browses forward or backward through those pages;
+- a fixed, text-free tunnel bridges one seam in the game track;
+- spinning streams one game through the tunnel for every 45 degrees of travel;
+- a center-logo tap animates forward to the next eight-game boundary;
 - large icon/title tiles form a broad ring around it;
 - each tile's baseline points outward, toward the nearest approach position;
 - north, east, south, and west edge handles are equivalent swipe affordances;
@@ -45,8 +46,10 @@ contrast, and deterministic design tokens.
 The runnable surface intentionally matches its defining relationships:
 a circular segmented wheel rather than floating rectangular cards, illustrated
 game emblems within deep wedge-shaped tokens, layered cyan/gold orbital rails, a
-large central crest, and bezel-mounted controls. The tokens use continuously
-rounded corners like physical inserts rather than sharp polygon joints. Fixture
+large central crest, one illuminated tunnel mouth, and bezel-mounted controls.
+The tunnel is a rotationally neutral, text-free piece of track infrastructure,
+not a privileged approach-side control. The tokens use continuously rounded
+corners like physical inserts rather than sharp polygon joints. Fixture
 illustration richness is representative; the live preview renders the existing
 catalogue's own `Icon` values.
 
@@ -64,8 +67,9 @@ parallax, sleeve/palm rejection, glare, and comfortable reach.
 1. The table wakes into the game ring; auth and catalogue loading are invisible
    infrastructure unless they fail.
 2. A person recognizes an icon/title near their edge.
-3. If necessary, they spin a handle, tile, or safe empty track to browse forward
-   or backward through the catalogue, or tap the center logo for the next page.
+3. If necessary, they spin a handle, tile, tunnel, or safe empty track. Each game
+   crossing into the tunnel vanishes while the next catalogue game emerges from
+   its other mouth. A center tap spins forward to the next eight-game boundary.
 4. They touch a game tile. The tile shows a pressed outline within 50 ms.
 5. Releasing without a drag opens the game URL exactly once.
 6. The launcher is gone; the target game is responsible for orientation, players,
@@ -100,34 +104,41 @@ technology.
 ### Brand and paging
 
 The center contains only a rotationally neutral logo and four outward-facing
-page indicators. When more than eight games exist, tapping the logo advances to
-the next alphabetical page of up to eight and wraps after the final page. The
-same page change happens in either direction while spinning the ring. Four
-outward-facing copies of `1 / 3` communicate page position. The accessible name
-is “Show next games, page 2 of 3”. With eight or fewer games the logo is inert
-and is not exposed as a button; all four indicators show `1 / 1`.
+page indicators. When more than eight games exist, tapping it animates the ring
+forward until the first game in the next original eight-game group reaches the
+outgoing tunnel mouth. From a partially spun position this completes only the
+remaining distance. At the final group it advances through the catalogue wrap
+to game zero. Four outward-facing copies of `1 / 3` communicate the group whose
+first game most recently crossed the boundary. The accessible name is “Show next
+games, page 2 of 3”. With eight or fewer distinct games the logo is inert and is
+not exposed as a button; all four indicators show `1 / 1`.
 
 ## Ring behavior
 
 ### Capacity
 
-- For up to eight games, distribute every tile around one complete ring.
-- For more games, split the alphabetically ordered catalogue into stable pages
-  of eight. Never shrink targets to fit all records.
-- Tapping the center loads the next page and wraps to page one. The last page may
-  contain fewer than eight tiles; it never repeats games merely to fill slots.
-- Every accumulated 45-degree swipe step loads the adjacent page in the drag
-  direction and wraps at either end. Residual rotation carries into that page so
-  the ring feels continuous rather than like a separate paging gesture.
+- Every non-empty catalogue renders exactly eight evenly spaced ring slots. Never
+  shrink, expand, or redistribute the geometry based on remaining game count.
+- Treat the alphabetically ordered catalogue as an infinite wrapping sequence.
+  A final partial group continues with game zero, so 14 games produce the second
+  boundary view `8, 9, 10, 11, 12, 13, 0, 1`.
+- Sequence entries use absolute occurrence keys. When a 45-degree threshold is
+  crossed, the seven retained DOM tiles stay on their continuous trajectories;
+  only the game hidden by the tunnel is removed and only its successor is added.
+- The fixed gate covers the seam between ring slots seven and zero. Initially
+  game zero sits at its outgoing mouth. Clockwise motion sends it inside while
+  game eight emerges at the incoming mouth.
+- Tapping the center moves forward to the next boundary at catalogue indices
+  `0`, `8`, `16`, and so on. The final boundary wraps at the actual list end.
 - Title order is stable and alphabetical so a host can learn the shelf.
 
 ### Swipe
 
-- Dragging a handle, tile, or empty track spins the ring and browses pages.
+- Dragging a handle, tile, tunnel, or empty track spins the same continuous ring.
 - A drag that begins on a tile cancels its launch intent after the movement
   threshold and becomes a ring drag.
 - Inertia is short and restrained; a tile must be stationary before it can launch.
-- Reduced-motion mode stops on release with no inertial animation.
+- Reduced-motion mode stops on release and snaps center paging to its destination.
 - Vertical/horizontal page scrolling is impossible because the surface owns the
   installed viewport.
 
@@ -141,7 +152,7 @@ and is not exposed as a button; all four indicators show `1 / 1`.
   long press, confirmation, or setup step.
 - A pointer cancel, drag, or release outside the tile does not launch.
 - Once opening begins, further touches are ignored to prevent duplicates.
-- Tapping the center never launches a game; stationary game taps never change page.
+- Tapping the center never launches a game; stationary game taps never move the ring.
 
 ## Visual system
 

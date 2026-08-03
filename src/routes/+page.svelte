@@ -8,7 +8,12 @@
   import { createFixtureCatalogue } from '$lib/data/fixture-catalogue';
   import { createFirebaseCatalogue } from '$lib/data/firebase-catalogue';
   import type { GameTile } from '$lib/domain/game-tile';
-  import { gamesForPage, nextPage, normalizePage, pageCount } from '$lib/domain/pagination';
+  import {
+    gamesForRing,
+    nextPageBoundary,
+    pageCount,
+    pageForSequence
+  } from '$lib/domain/pagination';
   import {
     angleFromPoint,
     ringPosition,
@@ -22,22 +27,27 @@
     games: [],
     rejected: []
   };
-  let pageIndex = 0;
+  let sequenceStart = 0;
   let ringAngle = 0;
   let launchLocked = false;
+  let paging = false;
+  let pageAnimationFrame: number | null = null;
   let drag: {
     pointerId: number;
     startX: number;
     startY: number;
     lastAngle: number;
     gameId: string | null;
+    gameKey: string | null;
     moved: boolean;
   } | null = null;
 
   $: totalPages = pageCount(snapshot.games.length);
-  $: pageIndex = Math.min(pageIndex, totalPages - 1);
-  $: visibleGames = gamesForPage(snapshot.games, pageIndex);
-  $: pageLabel = `${pageIndex + 1} / ${totalPages}`;
+  $: currentPage = pageForSequence(sequenceStart, snapshot.games.length);
+  $: nextBoundary = nextPageBoundary(sequenceStart, snapshot.games.length);
+  $: nextBoundaryPage = pageForSequence(nextBoundary, snapshot.games.length);
+  $: visibleGames = gamesForRing(snapshot.games, sequenceStart);
+  $: pageLabel = `${currentPage + 1} / ${totalPages}`;
   $: hasPages = snapshot.games.length > 8;
   $: statusLabel = statusText(snapshot);
 
@@ -60,17 +70,47 @@
     return () => {
       cancelled = true;
       unsubscribe();
+      if (pageAnimationFrame !== null) cancelAnimationFrame(pageAnimationFrame);
     };
   });
 
   function showNextPage() {
-    if (!hasPages || drag) return;
-    pageIndex = nextPage(pageIndex, snapshot.games.length);
-    ringAngle = 0;
+    if (!hasPages || drag || paging) return;
+    const target = nextPageBoundary(sequenceStart, snapshot.games.length);
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      sequenceStart = target;
+      ringAngle = 0;
+      return;
+    }
+
+    const travel = (target - sequenceStart) * PAGE_SPIN_STEP - ringAngle;
+    const duration = Math.min(1600, Math.max(550, Math.abs(travel) * 2.8));
+    const startedAt = performance.now();
+    let applied = 0;
+    paging = true;
+
+    const tick = (now: number) => {
+      const progress = Math.min(1, (now - startedAt) / duration);
+      const eased = progress < 0.5
+        ? 4 * progress * progress * progress
+        : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+      const desired = travel * eased;
+      applyRingDelta(desired - applied);
+      applied = desired;
+      if (progress < 1) {
+        pageAnimationFrame = requestAnimationFrame(tick);
+        return;
+      }
+      sequenceStart = target;
+      ringAngle = 0;
+      paging = false;
+      pageAnimationFrame = null;
+    };
+    pageAnimationFrame = requestAnimationFrame(tick);
   }
 
   function pointerDown(event: PointerEvent) {
-    if (event.button !== 0 || drag || launchLocked) return;
+    if (event.button !== 0 || drag || launchLocked || paging) return;
     const surface = event.currentTarget as HTMLElement;
     const bounds = surface.getBoundingClientRect();
     const target = event.target as HTMLElement;
@@ -81,6 +121,7 @@
       startY: event.clientY,
       lastAngle: angleFromPoint(event.clientX, event.clientY, bounds.left + bounds.width / 2, bounds.top + bounds.height / 2),
       gameId: tile?.dataset.gameId ?? null,
+      gameKey: tile?.dataset.carouselKey ?? null,
       moved: false
     };
     surface.setPointerCapture(event.pointerId);
@@ -98,16 +139,19 @@
       bounds.left + bounds.width / 2,
       bounds.top + bounds.height / 2
     );
-    ringAngle += shortestAngleDelta(drag.lastAngle, current);
+    applyRingDelta(shortestAngleDelta(drag.lastAngle, current));
     drag.lastAngle = current;
+  }
 
-    if (!hasPages) return;
+  function applyRingDelta(delta: number) {
+    ringAngle += delta;
+    if (snapshot.games.length === 0) return;
     while (ringAngle >= PAGE_SPIN_STEP) {
-      pageIndex = normalizePage(pageIndex + 1, snapshot.games.length);
+      sequenceStart += 1;
       ringAngle -= PAGE_SPIN_STEP;
     }
     while (ringAngle <= -PAGE_SPIN_STEP) {
-      pageIndex = normalizePage(pageIndex - 1, snapshot.games.length);
+      sequenceStart -= 1;
       ringAngle += PAGE_SPIN_STEP;
     }
   }
@@ -117,14 +161,15 @@
     const completed = drag;
     drag = null;
     if (completed.moved) {
-      ringAngle = Math.round(ringAngle / 5) * 5;
+      const settledAngle = Math.round(ringAngle / 5) * 5;
+      applyRingDelta(settledAngle - ringAngle);
       return;
     }
     if (completed.gameId) {
       const releaseTile = document
         .elementFromPoint(event.clientX, event.clientY)
         ?.closest<HTMLElement>('[data-game-id]');
-      if (releaseTile?.dataset.gameId !== completed.gameId) return;
+      if (releaseTile?.dataset.carouselKey !== completed.gameKey) return;
       const game = snapshot.games.find(({ id }) => id === completed.gameId);
       if (game) launchGame(game);
     }
@@ -171,9 +216,12 @@
 
 <main
   class:dragging={drag?.moved}
+  class:paging
   class="tabletop"
   data-e2e-layout
   data-status={snapshot.status}
+  data-sequence-start={sequenceStart}
+  data-ring-angle={ringAngle.toFixed(2)}
   aria-label="Table Top Launcher"
   onpointerdown={pointerDown}
   onpointermove={pointerMove}
@@ -207,13 +255,16 @@
   {/each}
 
   {#if snapshot.status === 'current' || snapshot.status === 'offline'}
-    <section class="game-ring" aria-label={`Games, page ${pageIndex + 1} of ${totalPages}`}>
-      {#each visibleGames as game, index (game.id)}
-        {@const position = ringPosition(index, visibleGames.length, ringAngle)}
+    <section class="game-ring" aria-label={`Games, page ${currentPage + 1} of ${totalPages}`}>
+      {#each visibleGames as entry, index (entry.key)}
+        {@const game = entry.game}
+        {@const position = ringPosition(7 - index, 8, ringAngle)}
         <button
           class="game-tile"
-          class:pressed={drag?.gameId === game.id && !drag.moved}
+          class:pressed={drag?.gameKey === entry.key && !drag.moved}
           data-game-id={game.id}
+          data-carousel-key={entry.key}
+          data-catalogue-index={entry.catalogueIndex}
           data-edge={position.edge}
           data-angle={position.angle.toFixed(2)}
           aria-label={`Launch ${game.title}`}
@@ -231,13 +282,17 @@
         </button>
       {/each}
     </section>
+    <div class="catalogue-gate" data-catalogue-gate aria-hidden="true">
+      <span></span><i></i><i></i>
+    </div>
   {/if}
 
   <div class="center-shell" class:paged={hasPages}>
     {#if hasPages}
       <button
         class="center-logo"
-        aria-label={`Show next games, page ${nextPage(pageIndex, snapshot.games.length) + 1} of ${totalPages}`}
+        aria-label={`Show next games, page ${nextBoundaryPage + 1} of ${totalPages}`}
+        disabled={paging}
         onclick={showNextPage}
         onpointerdown={(event) => event.stopPropagation()}
       >
@@ -259,7 +314,7 @@
   {#if snapshot.status === 'empty' || snapshot.status === 'error'}
     <div class="system-state" role="status">{statusLabel}</div>
   {:else}
-    <p class="sr-only" aria-live="polite">{statusLabel}. Page {pageIndex + 1} of {totalPages}.</p>
+    <p class="sr-only" aria-live="polite">{statusLabel}. Page {currentPage + 1} of {totalPages}.</p>
   {/if}
 </main>
 
