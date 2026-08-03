@@ -13,8 +13,9 @@ The workflow validates the package, publishes a PR-specific directory on
 the older deployment.
 
 This PR previews the runnable omnidirectional launcher against the existing
-LauncherUI `Applications` catalogue. Reviewers can rotate the current ring, page
-through the current production game count, and exercise the real launch URLs.
+LauncherUI `Applications` catalogue. Reviewers can spin through the current
+production game count in either direction, tap the logo to advance a page, and
+exercise the real launch URLs.
 Authentication is anonymous and silent; the client has no Firestore write path.
 
 ## Application preview modes
@@ -69,7 +70,8 @@ Pages branch.
 - Relative assets work at nested `/pr-N/` paths.
 - The page reports catalogue readiness from all four edges.
 - Center-logo taps advance through the production-sized catalogue and wrap.
-- Ring drags move the current page and do not launch a game.
+- Each 45° ring-drag step loads the next or previous page, wraps, and never
+  launches a game.
 - Same-PR updates preserve other preview directories.
 - Failed validation never deploys.
 

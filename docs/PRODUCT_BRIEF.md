@@ -17,8 +17,8 @@ layout, account management, personal history, or preferred viewing direction.
 
 1. See that the shared table is ready.
 2. Recognize a game from its icon and title from the nearest edge.
-3. Swipe the current ring to bring a game toward an edge, or tap the center logo
-   to load the next alphabetical page of eight games.
+3. Spin the ring forward or backward through the alphabetical pages of eight,
+   or tap the center logo to load the next page.
 4. Tap one game tile once.
 5. Leave the launcher as the target game opens. Everything after launch belongs
    to that game.
@@ -44,7 +44,7 @@ layout, account management, personal history, or preferred viewing direction.
 - One full-screen radial game carousel with outward-facing titles
 - Stable alphabetical pages of eight; center-logo tap advances and wraps pages
 - Direct tap-to-launch with a brief pressed state and safe popup/navigation
-- One-finger current-page rotation with tap-versus-drag disambiguation
+- One-finger continuous page browsing with tap-versus-drag disambiguation
 - Loading, empty, offline-cache, and error states repeated/oriented for all sides
 - Static SvelteKit deployment, Firebase emulators, deterministic E2E, and PR
   previews at the exact table viewport
