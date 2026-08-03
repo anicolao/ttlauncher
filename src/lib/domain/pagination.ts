@@ -18,19 +18,24 @@ export function normalizeGameIndex(index: number, gameCount: number): number {
   return ((index % gameCount) + gameCount) % gameCount;
 }
 
+export function gameForSequence(games: GameTile[], sequenceIndex: number): RingGame | null {
+  if (games.length === 0) return null;
+  const catalogueIndex = normalizeGameIndex(sequenceIndex, games.length);
+  const game = games[catalogueIndex];
+  return {
+    game,
+    catalogueIndex,
+    sequenceIndex,
+    key: `${game.id}:${sequenceIndex}`
+  };
+}
+
 export function gamesForRing(games: GameTile[], sequenceStart: number): RingGame[] {
   if (games.length === 0) return [];
-  return Array.from({ length: PAGE_SIZE }, (_, offset) => {
-    const sequenceIndex = sequenceStart + offset;
-    const catalogueIndex = normalizeGameIndex(sequenceIndex, games.length);
-    const game = games[catalogueIndex];
-    return {
-      game,
-      catalogueIndex,
-      sequenceIndex,
-      key: `${game.id}:${sequenceIndex}`
-    };
-  });
+  return Array.from(
+    { length: PAGE_SIZE },
+    (_, offset) => gameForSequence(games, sequenceStart + offset)!
+  );
 }
 
 export function pageForSequence(sequenceStart: number, gameCount: number): number {

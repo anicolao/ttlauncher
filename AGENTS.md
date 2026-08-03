@@ -32,6 +32,9 @@ These rules apply to every change in this repository.
   an infinite wrapping sequence passing through one fixed tunnel: each 45-degree
   swipe step replaces only the game crossing the gate. Tapping the center animates
   forward to the next eight-game boundary.
+- The tunnel is a top-down radial wiper on the right side of the disc. During a
+  crossing, outgoing and incoming occurrences share one trajectory under
+  complementary screen-aligned clips so both remain partially visible.
 - The entire launcher fits the installed 16:9 display without document scroll.
 - Honour reduced motion and forced colours. Provide keyboard/service access as
   a fallback, but do not use conventional desktop layout as the visual model.

@@ -61,9 +61,10 @@ offline cache, and no Firestore write path.
 - Implement ellipse/ring geometry and outward/four-band title orientation.
 - Render large semantic tile controls, conditional center page button, four
   edge handles, and four outward-facing page counters.
-- Render an eight-slot wrapping window over the alphabetical catalogue; replace
-  one token under the fixed tunnel per 45° step and animate center taps to the
-  next original-catalogue boundary.
+- Render an eight-slot wrapping window over the alphabetical catalogue; overlay
+  complementary clipped outgoing/incoming occurrences under a right-side radial
+  wiper, replace one token per 45° step, and animate center taps to the next
+  original-catalogue boundary.
 - Add geometry/unit/component coverage and E2E scenario 001.
 
 Exit criteria: target/gap/viewport invariants pass; north/east/south/west/corner

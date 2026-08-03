@@ -119,11 +119,11 @@ test('launches directly from north, east, south, west, and a corner', async ({ p
     }))
   );
   const selected = [
-    candidates.find(({ angle }) => angle === 270)!,
-    candidates.find(({ angle }) => angle === 0)!,
-    candidates.find(({ angle }) => angle === 90)!,
-    candidates.find(({ angle }) => angle === 180)!,
-    candidates.find(({ angle }) => angle === 315)!
+    candidates.find(({ angle }) => angle === 292.5)!,
+    candidates.find(({ angle }) => angle === 22.5)!,
+    candidates.find(({ angle }) => angle === 112.5)!,
+    candidates.find(({ angle }) => angle === 202.5)!,
+    candidates.find(({ angle }) => angle === 337.5)!
   ];
   let popupCount = 0;
   page.on('popup', () => popupCount++);
@@ -155,6 +155,16 @@ test('a game crosses the tunnel and center paging completes its boundary', async
   await expect(page.getByRole('button', { name: 'Launch Hearthland' })).toBeVisible();
   await expect(page.locator('[data-game-id]')).toHaveCount(8);
   await expect(page.locator('[data-e2e-layout]')).toHaveAttribute('data-sequence-start', '1');
+  await expect(page.locator('[data-gate-transition="forward"]')).toHaveCount(1);
+  await expect(page.locator('[data-gate-transition="forward"] .tile-title'))
+    .toHaveText('Lantern Market');
+  await expect(page.locator('.gate-outgoing-forward')).toHaveCount(1);
+  expect(await page.locator('.gate-outgoing-forward').evaluate((element) =>
+    getComputedStyle(element).clipPath
+  )).not.toBe('none');
+  expect(await page.locator('.gate-incoming-forward').evaluate((element) =>
+    getComputedStyle(element).clipPath
+  )).not.toBe('none');
   await expect(page.getByRole('button', { name: /Show next games/ }))
     .toHaveAccessibleName('Show next games, page 2 of 3');
   expect(popupCount).toBe(0);
@@ -176,7 +186,7 @@ test('a game crosses the tunnel and center paging completes its boundary', async
   await expect(page.locator('[data-e2e-layout]')).toHaveAttribute('data-sequence-start', '8');
   await expect(page.locator('[data-e2e-layout]')).toHaveAttribute('data-ring-angle', '0.00');
   await expect(page.getByRole('button', { name: 'Launch Hearthland' }))
-    .toHaveAttribute('data-angle', '225.00');
+    .toHaveAttribute('data-angle', '337.50');
   await expect(page.locator('[data-game-id]')).toHaveCount(8);
   await expect(page.getByRole('button', { name: /Show next games/ }))
     .toHaveAccessibleName('Show next games, page 3 of 3');

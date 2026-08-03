@@ -9,6 +9,7 @@
   import { createFirebaseCatalogue } from '$lib/data/firebase-catalogue';
   import type { GameTile } from '$lib/domain/game-tile';
   import {
+    gameForSequence,
     gamesForRing,
     nextPageBoundary,
     pageCount,
@@ -22,6 +23,7 @@
 
   const TAP_THRESHOLD = 18;
   const PAGE_SPIN_STEP = 45;
+  const GATE_ANGLE_OFFSET = 112.5;
   let snapshot: CatalogueSnapshot = {
     status: 'loading',
     games: [],
@@ -47,6 +49,14 @@
   $: nextBoundary = nextPageBoundary(sequenceStart, snapshot.games.length);
   $: nextBoundaryPage = pageForSequence(nextBoundary, snapshot.games.length);
   $: visibleGames = gamesForRing(snapshot.games, sequenceStart);
+  $: transitionDirection = ringAngle > 0 ? 'forward' : ringAngle < 0 ? 'reverse' : null;
+  $: transitionProgress = Math.min(1, Math.abs(ringAngle) / PAGE_SPIN_STEP);
+  $: transitionEntry = transitionDirection
+    ? gameForSequence(
+        snapshot.games,
+        transitionDirection === 'forward' ? sequenceStart + 8 : sequenceStart - 1
+      )
+    : null;
   $: pageLabel = `${currentPage + 1} / ${totalPages}`;
   $: hasPages = snapshot.games.length > 8;
   $: statusLabel = statusText(snapshot);
@@ -258,29 +268,61 @@
     <section class="game-ring" aria-label={`Games, page ${currentPage + 1} of ${totalPages}`}>
       {#each visibleGames as entry, index (entry.key)}
         {@const game = entry.game}
-        {@const position = ringPosition(7 - index, 8, ringAngle)}
-        <button
-          class="game-tile"
-          class:pressed={drag?.gameKey === entry.key && !drag.moved}
-          data-game-id={game.id}
-          data-carousel-key={entry.key}
-          data-catalogue-index={entry.catalogueIndex}
-          data-edge={position.edge}
-          data-angle={position.angle.toFixed(2)}
-          aria-label={`Launch ${game.title}`}
-          style={`--tile-x:${position.xPercent}%;--tile-y:${position.yPercent}%;--tile-rotation:${position.rotation}deg;--tile-shell-rotation:${position.shellRotation}deg;`}
-          onclick={(event) => keyboardActivate(event, game)}
+        {@const position = ringPosition(7 - index, 8, ringAngle + GATE_ANGLE_OFFSET)}
+        <div
+          class="game-position"
+          class:gate-outgoing-forward={transitionDirection === 'forward' && index === 0}
+          class:gate-outgoing-reverse={transitionDirection === 'reverse' && index === 7}
+          style={`--tile-x:${position.xPercent}%;--tile-y:${position.yPercent}%;--tile-rotation:${position.rotation}deg;--tile-shell-rotation:${position.shellRotation}deg;--gate-progress:${transitionProgress * 100}%;--gate-remainder:${(1 - transitionProgress) * 100}%;`}
         >
-          <span class="icon-frame tile-art">
-            {#if game.iconSrc}
-              <img src={game.iconSrc} alt="" draggable="false" />
-            {:else}
-              <span class="icon-fallback" aria-hidden="true">{game.title.slice(0, 2)}</span>
-            {/if}
-          </span>
-          <strong class="tile-title">{game.title}</strong>
-        </button>
+          <button
+            class="game-tile"
+            class:pressed={drag?.gameKey === entry.key && !drag.moved}
+            data-game-id={game.id}
+            data-carousel-key={entry.key}
+            data-catalogue-index={entry.catalogueIndex}
+            data-edge={position.edge}
+            data-angle={position.angle.toFixed(2)}
+            aria-label={`Launch ${game.title}`}
+            onclick={(event) => keyboardActivate(event, game)}
+          >
+            <span class="icon-frame tile-art">
+              {#if game.iconSrc}
+                <img src={game.iconSrc} alt="" draggable="false" />
+              {:else}
+                <span class="icon-fallback" aria-hidden="true">{game.title.slice(0, 2)}</span>
+              {/if}
+            </span>
+            <strong class="tile-title">{game.title}</strong>
+          </button>
+        </div>
       {/each}
+
+      {#if transitionEntry && transitionDirection}
+        {@const incoming = transitionEntry.game}
+        {@const transitionPosition = ringPosition(
+          transitionDirection === 'forward' ? 7 : 0,
+          8,
+          ringAngle + GATE_ANGLE_OFFSET
+        )}
+        <div
+          class="game-position gate-incoming-{transitionDirection}"
+          data-gate-transition={transitionDirection}
+          style={`--tile-x:${transitionPosition.xPercent}%;--tile-y:${transitionPosition.yPercent}%;--tile-rotation:${transitionPosition.rotation}deg;--tile-shell-rotation:${transitionPosition.shellRotation}deg;--gate-progress:${transitionProgress * 100}%;--gate-remainder:${(1 - transitionProgress) * 100}%;`}
+          aria-hidden="true"
+        >
+          <div class="game-tile transition-ghost">
+            <span class="icon-frame tile-art">
+              {#if incoming.iconSrc}
+                <img src={incoming.iconSrc} alt="" draggable="false" />
+              {:else}
+                <span class="icon-fallback">{incoming.title.slice(0, 2)}</span>
+              {/if}
+            </span>
+            <strong class="tile-title">{incoming.title}</strong>
+          </div>
+        </div>
+      {/if}
     </section>
     <div class="catalogue-gate" data-catalogue-gate aria-hidden="true">
       <span></span><i></i><i></i>
@@ -358,6 +400,16 @@
   .orbit-inner { width: 37%; aspect-ratio: 1; border: 1px solid rgba(255,228,92,.28); }
 
   .game-ring { position: absolute; inset: 0; z-index: 2; }
+  .game-position {
+    position: absolute;
+    left: var(--tile-x);
+    top: var(--tile-y);
+    width: 25rem;
+    height: 25rem;
+    transform: translate(-50%, -50%);
+    overflow: visible;
+    pointer-events: none;
+  }
   .game-tile {
     --tile-x: 50%; --tile-y: 50%; --tile-rotation: 0deg;
     position: absolute;
@@ -378,6 +430,8 @@
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
   }
+  .game-position .game-tile { left: 50%; top: 50%; pointer-events: auto; }
+  .game-position .transition-ghost { pointer-events: none; }
   .game-tile:hover, .game-tile:focus-visible, .game-tile.pressed {
     border-color: #ffe45c;
     box-shadow: 0 0 0 .35rem rgba(7,20,29,.95), 0 0 2rem rgba(255,228,92,.5);

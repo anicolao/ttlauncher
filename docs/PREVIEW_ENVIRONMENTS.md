@@ -14,7 +14,7 @@ the older deployment.
 
 This PR previews the runnable omnidirectional launcher against the existing
 LauncherUI `Applications` catalogue. Reviewers can stream the current production
-games through the fixed tunnel in either direction, tap the logo to animate to
+games through the right-side radial wiper in either direction, tap the logo to animate to
 the next eight-game boundary, and exercise the real launch URLs.
 Authentication is anonymous and silent; the client has no Firestore write path.
 
@@ -70,8 +70,9 @@ Pages branch.
 - Relative assets work at nested `/pr-N/` paths.
 - The page reports catalogue readiness from all four edges.
 - Center-logo taps animate to the next catalogue boundary and wrap.
-- Each 45° ring-drag step replaces exactly one game through the tunnel while
-  preserving eight slots and never launching a game.
+- During each ring step, the radial wiper shows complementary clipped outgoing
+  and incoming games; at 45° it replaces exactly one while preserving eight slots
+  and never launching a game.
 - Same-PR updates preserve other preview directories.
 - Failed validation never deploys.
 

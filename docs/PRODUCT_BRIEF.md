@@ -43,7 +43,8 @@ layout, account management, personal history, or preferred viewing direction.
 - Runtime validation of legacy `Title`, `Icon`, and `URL` fields
 - One full-screen radial game carousel with outward-facing titles
 - Eight permanently spaced slots over a wrapping alphabetical catalogue
-- Fixed tunnel replaces one outgoing game with one incoming game per ring step
+- Right-side top-down radial wiper reveals incoming and outgoing clipped halves
+- One outgoing game is replaced by one incoming game per completed ring step
 - Center-logo tap animates to the next catalogue boundary and wraps
 - Direct tap-to-launch with a brief pressed state and safe popup/navigation
 - One-finger continuous catalogue browsing with tap-versus-drag disambiguation
