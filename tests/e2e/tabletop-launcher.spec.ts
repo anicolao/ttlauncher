@@ -85,17 +85,20 @@ test('center logo spins to eight-game boundaries and wraps without launching', a
 
   const center = page.getByRole('button', { name: /Show next games/ });
   await center.click();
+  await expect(page.locator('[data-e2e-layout]')).toHaveAttribute('data-sequence-start', '8');
   await expect(page.locator('[data-game-id]')).toHaveCount(8);
   await expect(page.getByRole('button', { name: 'Launch Hearthland' })).toBeVisible();
   await expect(center).toHaveAccessibleName('Show next games, page 3 of 3');
 
   await center.click();
+  await expect(page.locator('[data-e2e-layout]')).toHaveAttribute('data-sequence-start', '16');
   await expect(page.locator('[data-game-id]')).toHaveCount(8);
   await expect(page.getByRole('button', { name: 'Launch Tidelines' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Launch Aurora Lines' })).toBeVisible();
   await expect(center).toHaveAccessibleName('Show next games, page 1 of 3');
 
   await center.click();
+  await expect(page.locator('[data-e2e-layout]')).toHaveAttribute('data-sequence-start', '18');
   await expect(page.getByRole('button', { name: 'Launch Aurora Lines' })).toBeVisible();
   expect(popupCount).toBe(0);
   await steps.step('paging-wrapped', { verifications: [() => expect(popupCount).toBe(0)] });
