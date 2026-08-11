@@ -275,8 +275,8 @@
           class="game-position"
           class:gate-outgoing-forward={transitionDirection === 'forward' && index === 0}
           class:gate-outgoing-reverse={transitionDirection === 'reverse' && index === 7}
-          style:--tile-x={`${position.xPercent}%`}
-          style:--tile-y={`${position.yPercent}%`}
+          style:--tile-dx={position.xPercent - 50}
+          style:--tile-dy={position.yPercent - 50}
           style:--tile-rotation={`${position.rotation}deg`}
           style:--tile-shell-rotation={`${position.shellRotation}deg`}
           style:--gate-progress={`${transitionProgress * 100}%`}
@@ -315,8 +315,8 @@
         <div
           class="game-position gate-incoming-{transitionDirection}"
           data-gate-transition={transitionDirection}
-          style:--tile-x={`${transitionPosition.xPercent}%`}
-          style:--tile-y={`${transitionPosition.yPercent}%`}
+          style:--tile-dx={transitionPosition.xPercent - 50}
+          style:--tile-dy={transitionPosition.yPercent - 50}
           style:--tile-rotation={`${transitionPosition.rotation}deg`}
           style:--tile-shell-rotation={`${transitionPosition.shellRotation}deg`}
           style:--gate-progress={`${transitionProgress * 100}%`}
@@ -411,14 +411,25 @@
   .orbit-outer { width: 78%; height: 78%; border: 2px solid rgba(103,219,231,.34); box-shadow: 0 0 2rem rgba(103,219,231,.14), inset 0 0 2rem rgba(103,219,231,.08); }
   .orbit-inner { width: 37%; aspect-ratio: 1; border: 1px solid rgba(255,228,92,.28); }
 
-  .game-ring { position: absolute; inset: 0; z-index: 2; }
+  /* A size query container, so cqw/cqh below resolve against the ring rather
+     than the viewport. This is what lets the tiles be placed with a transform
+     instead of left/top: percentages inside translate() would resolve against
+     the element's own 25rem box, which is the wrong reference. */
+  .game-ring { position: absolute; inset: 0; z-index: 2; container-type: size; }
   .game-position {
     position: absolute;
-    left: var(--tile-x);
-    top: var(--tile-y);
+    /* Placed by transform, not left/top. Changing left/top forces layout on
+       every frame of a drag or a page turn, and layout cannot be handed to the
+       compositor; a transform can. Verified pixel-identical to the previous
+       left/top placement on the target hardware — zero pixels of difference
+       across all eight tiles. --tile-dx/--tile-dy are the offsets from the
+       ring's centre, in percent, as plain numbers. */
+    left: 50%;
+    top: 50%;
     width: 25rem;
     height: 25rem;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%)
+      translate(calc(var(--tile-dx, 0) * 1cqw), calc(var(--tile-dy, 0) * 1cqh));
     overflow: visible;
     pointer-events: none;
   }

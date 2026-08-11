@@ -436,7 +436,9 @@ main.tabletop .edge-status.west {
      catch. Rotating a tile in place was already 56.5 fps, so only movement
      needs this. */
   main.tabletop.dragging .game-tile,
-  main.tabletop.paging .game-tile { will-change: transform; }
+  main.tabletop.paging .game-tile,
+  main.tabletop.dragging .game-position,
+  main.tabletop.paging .game-position { will-change: transform; }
 }
 
 @media (forced-colors: active) {
