@@ -422,6 +422,21 @@ main.tabletop .edge-status.west {
   }
   main.tabletop.dragging .game-tile,
   main.tabletop.paging .game-tile { transition: none; }
+
+  /* Promote each tile to its own compositor layer while the ring is moving.
+     Moving the tiles is what costs frames: measured on the Orange Pi 5 Plus at
+     3840x2160, dragging the ring ran at 12.9 fps, and it made no difference
+     whether the tile art, the filters or the SVG clip-path were removed. The
+     tiles were being re-rasterised every frame at their new position. With this
+     promotion the same drag runs at 53.3 fps.
+
+     Scoped to the moving states on purpose. Promoting permanently would keep
+     eight extra layers alive for a static screen and can alter text
+     rasterisation, which the visual baselines run at maxDiffPixels: 0 would
+     catch. Rotating a tile in place was already 56.5 fps, so only movement
+     needs this. */
+  main.tabletop.dragging .game-tile,
+  main.tabletop.paging .game-tile { will-change: transform; }
 }
 
 @media (forced-colors: active) {
