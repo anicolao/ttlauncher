@@ -42,6 +42,10 @@
     gameId: string | null;
     gameKey: string | null;
     moved: boolean;
+    // Measured once on pointer down. The ring cannot move or resize while a
+    // finger is down, so re-reading it per move only costs a forced layout.
+    centerX: number;
+    centerY: number;
   } | null = null;
 
   $: totalPages = pageCount(snapshot.games.length);
@@ -123,16 +127,20 @@
     if (event.button !== 0 || drag || launchLocked || paging) return;
     const surface = event.currentTarget as HTMLElement;
     const bounds = surface.getBoundingClientRect();
+    const centerX = bounds.left + bounds.width / 2;
+    const centerY = bounds.top + bounds.height / 2;
     const target = event.target as HTMLElement;
     const tile = target.closest<HTMLElement>('[data-game-id]');
     drag = {
       pointerId: event.pointerId,
       startX: event.clientX,
       startY: event.clientY,
-      lastAngle: angleFromPoint(event.clientX, event.clientY, bounds.left + bounds.width / 2, bounds.top + bounds.height / 2),
+      lastAngle: angleFromPoint(event.clientX, event.clientY, centerX, centerY),
       gameId: tile?.dataset.gameId ?? null,
       gameKey: tile?.dataset.carouselKey ?? null,
-      moved: false
+      moved: false,
+      centerX,
+      centerY
     };
     surface.setPointerCapture(event.pointerId);
   }
@@ -142,13 +150,7 @@
     const distance = Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY);
     if (distance >= TAP_THRESHOLD) drag.moved = true;
     if (!drag.moved) return;
-    const bounds = (event.currentTarget as HTMLElement).getBoundingClientRect();
-    const current = angleFromPoint(
-      event.clientX,
-      event.clientY,
-      bounds.left + bounds.width / 2,
-      bounds.top + bounds.height / 2
-    );
+    const current = angleFromPoint(event.clientX, event.clientY, drag.centerX, drag.centerY);
     applyRingDelta(shortestAngleDelta(drag.lastAngle, current));
     drag.lastAngle = current;
   }
@@ -273,7 +275,12 @@
           class="game-position"
           class:gate-outgoing-forward={transitionDirection === 'forward' && index === 0}
           class:gate-outgoing-reverse={transitionDirection === 'reverse' && index === 7}
-          style={`--tile-x:${position.xPercent}%;--tile-y:${position.yPercent}%;--tile-rotation:${position.rotation}deg;--tile-shell-rotation:${position.shellRotation}deg;--gate-progress:${transitionProgress * 100}%;--gate-remainder:${(1 - transitionProgress) * 100}%;`}
+          style:--tile-x={`${position.xPercent}%`}
+          style:--tile-y={`${position.yPercent}%`}
+          style:--tile-rotation={`${position.rotation}deg`}
+          style:--tile-shell-rotation={`${position.shellRotation}deg`}
+          style:--gate-progress={`${transitionProgress * 100}%`}
+          style:--gate-remainder={`${(1 - transitionProgress) * 100}%`}
         >
           <button
             class="game-tile"
@@ -308,7 +315,12 @@
         <div
           class="game-position gate-incoming-{transitionDirection}"
           data-gate-transition={transitionDirection}
-          style={`--tile-x:${transitionPosition.xPercent}%;--tile-y:${transitionPosition.yPercent}%;--tile-rotation:${transitionPosition.rotation}deg;--tile-shell-rotation:${transitionPosition.shellRotation}deg;--gate-progress:${transitionProgress * 100}%;--gate-remainder:${(1 - transitionProgress) * 100}%;`}
+          style:--tile-x={`${transitionPosition.xPercent}%`}
+          style:--tile-y={`${transitionPosition.yPercent}%`}
+          style:--tile-rotation={`${transitionPosition.rotation}deg`}
+          style:--tile-shell-rotation={`${transitionPosition.shellRotation}deg`}
+          style:--gate-progress={`${transitionProgress * 100}%`}
+          style:--gate-remainder={`${(1 - transitionProgress) * 100}%`}
           aria-hidden="true"
         >
           <div class="game-tile transition-ghost">
