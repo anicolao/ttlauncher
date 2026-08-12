@@ -2,6 +2,7 @@
   import '@fontsource/atkinson-hyperlegible/400.css';
   import '@fontsource/atkinson-hyperlegible/700.css';
   import './tabletop-polish.css';
+  import { ringSlot, setRingSweep } from '$lib/ui/ring-animation';
   import { base } from '$app/paths';
   import { onMount } from 'svelte';
   import type { CatalogueSnapshot } from '$lib/data/catalogue-source';
@@ -53,6 +54,11 @@
   $: nextBoundary = nextPageBoundary(sequenceStart, snapshot.games.length);
   $: nextBoundaryPage = pageForSequence(nextBoundary, snapshot.games.length);
   $: visibleGames = gamesForRing(snapshot.games, sequenceStart);
+  /* One degree of freedom for the whole ring, so one seek. Doing this instead
+     of writing eight transforms per frame is what removes style recalculation
+     from the drag; see src/lib/ui/ring-animation.ts. */
+  $: setRingSweep(ringAngle + GATE_ANGLE_OFFSET);
+
   $: transitionDirection = ringAngle > 0 ? 'forward' : ringAngle < 0 ? 'reverse' : null;
   $: transitionProgress = Math.min(1, Math.abs(ringAngle) / PAGE_SPIN_STEP);
   $: transitionEntry = transitionDirection
@@ -271,16 +277,16 @@
       {#each visibleGames as entry, index (entry.key)}
         {@const game = entry.game}
         {@const position = ringPosition(7 - index, 8, ringAngle + GATE_ANGLE_OFFSET)}
+        {@const isGate =
+          (transitionDirection === 'forward' && index === 0) ||
+          (transitionDirection === 'reverse' && index === 7)}
         <div
           class="game-position"
           class:gate-outgoing-forward={transitionDirection === 'forward' && index === 0}
           class:gate-outgoing-reverse={transitionDirection === 'reverse' && index === 7}
-          style:--tile-dx={position.xPercent - 50}
-          style:--tile-dy={position.yPercent - 50}
-          style:--tile-rotation={`${position.rotation}deg`}
-          style:--tile-shell-rotation={`${position.shellRotation}deg`}
-          style:--gate-progress={`${transitionProgress * 100}%`}
-          style:--gate-remainder={`${(1 - transitionProgress) * 100}%`}
+          use:ringSlot={7 - index}
+          style:--gate-progress={isGate ? `${transitionProgress * 100}%` : null}
+          style:--gate-remainder={isGate ? `${(1 - transitionProgress) * 100}%` : null}
         >
           <button
             class="game-tile"
@@ -315,10 +321,7 @@
         <div
           class="game-position gate-incoming-{transitionDirection}"
           data-gate-transition={transitionDirection}
-          style:--tile-dx={transitionPosition.xPercent - 50}
-          style:--tile-dy={transitionPosition.yPercent - 50}
-          style:--tile-rotation={`${transitionPosition.rotation}deg`}
-          style:--tile-shell-rotation={`${transitionPosition.shellRotation}deg`}
+          use:ringSlot={transitionDirection === 'forward' ? 7 : 0}
           style:--gate-progress={`${transitionProgress * 100}%`}
           style:--gate-remainder={`${(1 - transitionProgress) * 100}%`}
           aria-hidden="true"
