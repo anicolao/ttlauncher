@@ -131,7 +131,15 @@ main.tabletop .game-position.gate-incoming-reverse {
   clip-path: inset(0 0 var(--gate-remainder) 0);
 }
 
-main.tabletop .game-position[class*='gate-'] { will-change: clip-path; }
+/* Explicit class selectors rather than [class*='gate-']. A substring match on
+   the class attribute cannot be indexed by the style engine's invalidation
+   sets, so every class change anywhere in the ring had to be treated as
+   possibly matching. Naming the four classes lets the invalidation be
+   targeted. */
+main.tabletop .game-position.gate-outgoing-forward,
+main.tabletop .game-position.gate-incoming-forward,
+main.tabletop .game-position.gate-outgoing-reverse,
+main.tabletop .game-position.gate-incoming-reverse { will-change: clip-path; }
 
 main.tabletop .catalogue-gate {
   position: absolute;
