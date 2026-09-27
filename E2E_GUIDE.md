@@ -28,7 +28,8 @@ isolated Firebase emulators.
 - **Rules:** authenticated `Applications` reads plus unauthenticated and all-write
   denial.
 - **E2E:** anonymous session, emulator catalogue, radial layout, multi-edge touch,
-  drag browsing, direct launch, offline/error states, and multi-touch safety.
+  drag browsing, direct launch, editor authorization/create/visibility, offline
+  and error states, and multi-touch safety.
 
 ## Repository layout
 
@@ -42,10 +43,11 @@ tests/e2e/
   ../fixtures/applications.mjs
 ```
 
-The current vertical slice has four coherent journeys: fixed-table geometry,
-center paging and wrap, direct launch from four edges plus a corner, and
-drag-without-launch. The scenario inventory below defines the remaining
-hardening work. There is no phone project and no game-details journey.
+The current vertical slice has five coherent journeys: fixed-table geometry,
+center paging and wrap, direct launch from four edges plus a corner,
+drag-without-launch, and authorized catalogue editing. The scenario inventory
+below defines the remaining hardening work. There is no phone project and no
+game-details journey.
 
 ## Unified step pattern
 
@@ -197,6 +199,7 @@ invalid scheme, popup-blocked/error feedback, and exactly-once dispatch.
 | 005 | Swipe/arbitration | handles, empty track, tile drag, thresholds, cancel, settle |
 | 006 | Resilience | cached offline ring, reconnect, empty, permission/error retry |
 | 007 | Multi-touch/a11y | simultaneous pointers, reduced motion, forced colours, service keyboard |
+| 008 | Catalogue editor | Google emulator sign-in, allow-list denial/grant, add, hide/show, launcher filtering |
 
 ## Visual baseline policy
 

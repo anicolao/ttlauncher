@@ -1,6 +1,6 @@
 # ADR 0002: Preserve the legacy catalogue through an adapter
 
-- Status: Proposed
+- Status: Superseded in part by ADR 0005; still authoritative for launcher reads
 - Date: 2026-08-02
 
 ## Context

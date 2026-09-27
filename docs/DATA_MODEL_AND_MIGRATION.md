@@ -24,6 +24,7 @@ interface LegacyApplication {
   Title?: unknown;
   URL?: unknown;
   Icon?: unknown;
+  Hidden?: unknown;
 }
 ```
 
@@ -49,6 +50,8 @@ Validation rules:
   production targets are rejected.
 - `Icon` may be an `https:` URL or a safe site-relative asset path. Failure uses
   a deterministic placeholder without blocking a valid launch URL.
+- `Hidden === true` suppresses the record before a `GameTile` is constructed.
+  Missing, false, and malformed values remain visible for legacy compatibility.
 - Titles sort with one pinned collator before radial placement.
 - Invalid records are excluded from active tiles and counted in a non-sensitive
   diagnostics state; malformed values are never rendered as HTML.
@@ -59,8 +62,9 @@ Do not read, infer, cache, or display player count, duration, genre, description
 setup, options, popularity, recent activity, favourites, categories, or user
 preferences. The launcher cannot promise facts its backend does not supply.
 
-Version one does not read or write `users/{uid}`. Firebase Auth exists solely to
-satisfy the authenticated catalogue rule.
+The tabletop route does not read or write `users/{uid}`. Its anonymous Firebase
+Auth session exists solely to satisfy the authenticated catalogue rule. The
+separate maintenance route checks only `Administrators/{uid}` authorization.
 
 ## Cache
 
@@ -79,15 +83,20 @@ Version one preserves the effective production boundary:
 ```text
 Applications/{document=**}
   read: authenticated
-  write: denied
+  create/update: enabled Administrators/{uid} only; validated catalogue fields
+  delete: denied
+
+Administrators/{uid}
+  get: matching signed-in uid only
+  list/write: denied
 
 everything else used by this client
   denied
 ```
 
-Existing unrelated rules may remain for compatibility, but the ttlauncher code
-must contain no path that writes them. Rules tests prove authenticated reads,
-unauthenticated denial, and all catalogue writes denied.
+Existing unrelated rules may remain for compatibility. Rules tests prove
+authenticated reads, unauthenticated denial, anonymous and non-editor write
+denial, field validation, approved editor create/update, and delete denial.
 
 ## Migration and rollout
 
@@ -102,12 +111,12 @@ No data rewrite is required.
 6. Exercise every valid game URL from a protected acceptance environment.
 7. Promote the new hosting release and retain the preceding release for rollback.
 
-Rollback changes the hosted client only. There are no ttlauncher writes or data
-migrations to undo.
+Rollback changes the hosted client and rules. Existing documents require no
+migration; `Hidden` can be removed or ignored by the preceding launcher.
 
 ## Future evolution
 
-Any request for catalogue metadata, personalization, admin editing, or launch
-parameters changes the product contract and requires a new ADR, schema/rules
-design, omnidirectional UX review, and explicit user approval. It must not slip
-into a tile as an “optional” field.
+Any further catalogue metadata, personalization, or launch parameters change the
+product contract and require another ADR, schema/rules design, omnidirectional
+UX review, and explicit user approval. They must not slip into a tile as
+“optional” fields.

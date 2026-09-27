@@ -3,6 +3,9 @@ import { expect, type Locator, type Page, type TestInfo } from '@playwright/test
 interface StepOptions {
   verifications: Array<() => Promise<void> | void>;
   screenshot?: string;
+  surface?: Locator;
+  status?: string;
+  tabletopGeometry?: boolean;
 }
 
 export class TestStepHelper {
@@ -13,15 +16,21 @@ export class TestStepHelper {
 
   async step(name: string, options: StepOptions) {
     for (const verify of options.verifications) await verify();
-    await expect(this.page.locator('[data-e2e-layout]')).toHaveAttribute('data-status', 'current');
+    const surface = options.surface ?? this.page.locator('[data-e2e-layout]');
+    await expect(surface).toHaveAttribute('data-status', options.status ?? 'current');
     await this.page.mouse.move(1, 1);
     await this.stabilizeAssets();
-    await this.assertFixedTable();
+    if (options.tabletopGeometry === false) await this.assertMaintenanceSurface();
+    else await this.assertFixedTable();
     if (options.screenshot) {
-      await expect(this.page.locator('[data-e2e-layout]')).toHaveScreenshot(options.screenshot);
+      await expect(surface).toHaveScreenshot(options.screenshot);
     }
     await this.testInfo.attach(`${name}.json`, {
-      body: Buffer.from(JSON.stringify({ step: name, viewport: '1920x1080', status: 'current' })),
+      body: Buffer.from(JSON.stringify({
+        step: name,
+        viewport: '1920x1080',
+        status: options.status ?? 'current'
+      })),
       contentType: 'application/json'
     });
   }
@@ -91,6 +100,12 @@ export class TestStepHelper {
       });
     });
     expect(renderedCollisions).toEqual([]);
+  }
+
+  private async assertMaintenanceSurface() {
+    expect(this.page.viewportSize()).toEqual({ width: 1920, height: 1080 });
+    expect(await this.page.evaluate(() => document.documentElement.scrollWidth))
+      .toBeLessThanOrEqual(1920);
   }
 }
 

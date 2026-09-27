@@ -27,7 +27,7 @@ export function parseLegacyApplication(
   const launchUrl = parseHttpsUrl(value.URL);
   if (!launchUrl) issues.push('URL must be an HTTPS URL without credentials');
 
-  const iconSrc = parseIcon(value.Icon, origin);
+  const iconSrc = parseIconUrl(value.Icon, origin);
   if (issues.length > 0) {
     return { game: null, rejected: { id, issues } };
   }
@@ -36,6 +36,10 @@ export function parseLegacyApplication(
     game: { id, title, iconSrc, launchUrl: launchUrl! },
     rejected: null
   };
+}
+
+export function isLegacyApplicationHidden(value: Record<string, unknown>): boolean {
+  return value.Hidden === true;
 }
 
 export function parseHttpsUrl(value: unknown): string | null {
@@ -49,7 +53,7 @@ export function parseHttpsUrl(value: unknown): string | null {
   }
 }
 
-function parseIcon(value: unknown, origin: string): string | null {
+export function parseIconUrl(value: unknown, origin = 'https://launcher.example.test'): string | null {
   if (typeof value !== 'string' || value.trim() === '') return null;
   const icon = value.trim();
   if (icon.startsWith('/') && !icon.startsWith('//') && !icon.includes('\\')) return icon;

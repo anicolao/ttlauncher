@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { parseHttpsUrl, parseLegacyApplication, sortGames } from './game-tile';
+import {
+  isLegacyApplicationHidden,
+  parseHttpsUrl,
+  parseLegacyApplication,
+  sortGames
+} from './game-tile';
 
 describe('legacy application adapter', () => {
   it('maps the existing Title/Icon/URL shape without adding launcher metadata', () => {
@@ -46,5 +51,12 @@ describe('legacy application adapter', () => {
       { id: 'a', title: 'Game 2', iconSrc: null, launchUrl: 'https://example.test/a' }
     ];
     expect(sortGames(games).map(({ id }) => id)).toEqual(['a', 'c', 'b']);
+  });
+
+  it('treats only an explicit Hidden true value as hidden', () => {
+    expect(isLegacyApplicationHidden({ Hidden: true })).toBe(true);
+    expect(isLegacyApplicationHidden({ Hidden: false })).toBe(false);
+    expect(isLegacyApplicationHidden({})).toBe(false);
+    expect(isLegacyApplicationHidden({ Hidden: 'true' })).toBe(false);
   });
 });

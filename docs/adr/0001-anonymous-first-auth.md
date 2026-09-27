@@ -1,6 +1,6 @@
 # ADR 0001: Silent anonymous-only Firebase authentication
 
-- Status: Proposed
+- Status: Superseded in part by ADR 0005; still authoritative for the tabletop route
 - Date: 2026-08-02
 
 ## Context

@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { authorizeCatalogueEditor } from './helpers/catalogue-admin';
 import { TestStepHelper } from './helpers/test-step-helper';
 
 async function openLauncher(page: Page) {
@@ -191,4 +192,70 @@ test('a game crosses the tunnel and center paging completes its boundary', async
   await expect(page.getByRole('button', { name: /Show next games/ }))
     .toHaveAccessibleName('Show next games, page 3 of 3');
   expect(popupCount).toBe(0);
+});
+
+test('an approved editor adds a game and toggles its launcher visibility', async ({ page }, testInfo) => {
+  const steps = new TestStepHelper(page, testInfo);
+  const editorSurface = page.locator('[data-editor-layout]');
+  await page.goto('/edit/');
+  await expect(page.getByRole('heading', { name: 'Administrator sign-in required' })).toBeVisible();
+
+  const [popup] = await Promise.all([
+    page.waitForEvent('popup'),
+    page.getByRole('button', { name: 'Sign in with Google' }).click()
+  ]);
+  // The third-party Auth Emulator handler leaves its account form display:none
+  // when reduced motion is forced. The application page stays reduced-motion;
+  // only the emulator-owned popup uses its normal transition.
+  await popup.emulateMedia({ reducedMotion: 'no-preference' });
+  await popup.getByRole('button', { name: /Add new account/ }).click();
+  await popup.getByLabel('Email').fill('catalogue-editor@example.test');
+  await popup.getByRole('button', { name: 'Sign in with Google.com' }).click();
+  await popup.waitForEvent('close');
+
+  await expect(page.getByRole('heading', { name: 'This account is not an editor' })).toBeVisible();
+  const uid = await page.locator('.gate code').innerText();
+  await authorizeCatalogueEditor(uid);
+  await page.reload();
+  await expect(editorSurface).toHaveAttribute('data-status', 'ready');
+
+  await steps.step('catalogue-editor-authorized', {
+    surface: editorSurface,
+    status: 'ready',
+    tabletopGeometry: false,
+    verifications: [
+      () => expect(page.getByRole('heading', { name: 'Add a game' })).toBeVisible(),
+      () => expect(page.locator('[data-application-id]')).toHaveCount(18)
+    ]
+  });
+
+  const addForm = page.locator('.new-game form');
+  await addForm.getByLabel('Title').fill('Aardvark Added');
+  await addForm.getByLabel('Launch URL').fill('https://games.example.test/aardvark-added');
+  await addForm.getByRole('button', { name: 'Add game' }).click();
+
+  const addedCard = page.locator('[data-application-id]').filter({ hasText: 'Aardvark Added' });
+  await expect(addedCard).toHaveCount(1);
+  await expect(addedCard.getByText('Visible', { exact: true })).toBeVisible();
+
+  await page.getByRole('link', { name: 'Table Top Launcher' }).click();
+  await expect(page.locator('[data-e2e-layout]')).toHaveAttribute('data-status', 'current');
+  await expect(page.getByRole('button', { name: 'Launch Aardvark Added' })).toBeVisible();
+
+  await page.goto('/edit/');
+  await expect(editorSurface).toHaveAttribute('data-status', 'ready');
+  const visibleCard = page.locator('[data-application-id]').filter({ hasText: 'Aardvark Added' });
+  await visibleCard.getByRole('button', { name: 'Hide from launcher' }).click();
+  await expect(visibleCard.getByText('Hidden', { exact: true })).toBeVisible();
+
+  await page.getByRole('link', { name: 'Table Top Launcher' }).click();
+  await expect(page.locator('[data-e2e-layout]')).toHaveAttribute('data-status', 'current');
+  await expect(page.getByRole('button', { name: 'Launch Aardvark Added' })).toHaveCount(0);
+
+  await steps.step('hidden-game-removed-from-launcher', {
+    verifications: [
+      () => expect(page.locator('[data-game-id]')).toHaveCount(8),
+      () => expect(page.getByRole('button', { name: 'Launch Aardvark Added' })).toHaveCount(0)
+    ]
+  });
 });

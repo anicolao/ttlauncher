@@ -39,7 +39,7 @@ layout, account management, personal history, or preferred viewing direction.
 ## Version-one scope
 
 - Silent anonymous Firebase Auth
-- Read-only access to the existing `Applications` collection
+- Read-only tabletop access to the existing `Applications` collection
 - Runtime validation of legacy `Title`, `Icon`, and `URL` fields
 - One full-screen radial game carousel with outward-facing titles
 - Eight permanently spaced slots over a wrapping alphabetical catalogue
@@ -51,16 +51,19 @@ layout, account management, personal history, or preferred viewing direction.
 - Loading, empty, offline-cache, and error states repeated/oriented for all sides
 - Static SvelteKit deployment, Firebase emulators, deterministic E2E, and PR
   previews at the exact table viewport
+- A separately addressed, authenticated maintenance route for approved editors
+  to add, correct, show, and hide catalogue entries
 
 ## Explicit non-goals
 
 - Phone, tablet-handheld, laptop, or conventional desktop layouts
-- Sign-in, profile, sign-out, Google linking, or user preferences
+- Sign-in, profile, sign-out, Google linking, or user preferences on the tabletop
+  route
 - Search, filters, categories, favourites, recents, recommendations, or analytics
 - Game details, description, player count, duration, genre, or cover metadata
 - Player/setup controls, launch confirmation, or settings of any kind
 - Hosting or embedding games; each target URL owns the post-tap experience
-- Migrating or enriching the existing catalogue
+- Bulk migration or game metadata beyond the storage-only `Hidden` flag
 
 ## Success measures
 

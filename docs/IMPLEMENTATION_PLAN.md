@@ -121,7 +121,8 @@ physical four-side checklist is recorded, and rollback is proven.
 - PR preview works at the fixed table viewport and declares its data mode.
 - Static checks, tests, build, diff check, and package validation pass.
 - No skipped test, relaxed screenshot, arbitrary sleep, production test access,
-  phone project, Firestore write, or intermediate launcher flow is introduced.
+  phone project, unauthorized Firestore write, or intermediate launcher flow is
+  introduced.
 
 ## Risks and mitigations
 
@@ -134,5 +135,5 @@ physical four-side checklist is recorded, and rollback is proven.
 | Multi-touch corrupts ring state | Pointer capture policy and simultaneous-hand tests |
 | Legacy malformed record | Runtime parser, safe omission/fallback |
 | Anonymous provider disabled | Explicit production prerequisite |
-| Preview touches production | Fixture default; protected live-read; no write code |
-| Rollback needs data restore | No ttlauncher data writes or migration |
+| Preview touches production | Fixture default; protected live-read; editor writes disabled |
+| Rollback needs data restore | No bulk migration; `Hidden` remains backward-compatible |
