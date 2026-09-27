@@ -17,7 +17,9 @@ LauncherUI `Applications` catalogue. Reviewers can stream the current production
 games through the right-side radial wiper in either direction, tap the logo to animate to
 the next eight-game boundary, and exercise the real launch URLs.
 Tabletop authentication is anonymous and silent. The editor write path is
-disabled in PR builds, so live-read previews cannot mutate production.
+enabled for full acceptance testing at `/edit`; Firestore Rules permit writes
+only for `anicolao@gmail.com` and `egirard@gmail.com`. Those writes update the
+shared live catalogue immediately.
 
 ## Application preview modes
 
@@ -26,7 +28,7 @@ Preview builds declare a mode in four small edge-facing labels:
 | Mode | Source | Auth | Writes | Use |
 | --- | --- | --- | --- | --- |
 | `fixture` | Versioned local catalogue | In-memory ready state | None | Validation builds and fork-safe visual review |
-| `live-read` (same-repository PR default) | Existing LauncherUI Firestore | Real anonymous Firebase auth | Editor disabled | Trusted compatibility review |
+| `live` (same-repository PR default) | Existing LauncherUI Firestore | Anonymous launcher / Google editor | Approved editor writes | Trusted compatibility and editor review |
 | `emulator` | Local Firebase emulators | Auth emulator | Authorized test writes | Developer and automated E2E |
 | `production` | Existing LauncherUI Firebase | Anonymous launcher / Google editor | Authorized editor writes | Released table and maintenance route |
 
@@ -48,12 +50,14 @@ smoke checks verify:
 ## Secrets and trust boundary
 
 - Fixture validation builds require only `GITHUB_TOKEN`.
-- Live-read is allowed only for branches in this repository, never forks, and
+- Live Firebase deployment is allowed only for branches in this repository,
+  never forks, and
   uses repository/environment secrets for public Firebase web configuration.
 - Do not give previews service-account keys or Firebase Admin access.
-- PR builds fail closed with the editor disabled. Do not sign an administrator
-  account into untrusted builds; Firestore Rules remain the write boundary.
-- Firebase rules and authorized origins remain the security boundary.
+- Only review same-repository preview code before signing in with an approved
+  editor account. Forks validate but do not deploy.
+- Exact verified-email checks in Firebase Rules and authorized origins remain
+  the security boundary; the matching client list is only an early UX gate.
 
 ## GitHub Pages setup and cleanup
 
@@ -89,6 +93,6 @@ Pages branch.
 
 A PR preview is not a production release. Only a validated push to `main`
 updates the production root, using the same public Firebase web configuration
-and silent anonymous read path as live-read previews. The `gh-pages` history
-retains the preceding build for rollback. Live-read proves data compatibility
-only; physical-table acceptance remains mandatory before promotion.
+and silent anonymous launcher path as live previews. The `gh-pages` history
+retains the preceding build for rollback. Preview editor changes are live data;
+physical-table acceptance remains mandatory before promotion.

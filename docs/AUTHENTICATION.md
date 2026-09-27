@@ -7,8 +7,9 @@ environment. There is no account prompt, profile, Google link, sign-out control,
 or identity-dependent launcher feature on that route.
 
 The separately addressed `/edit` maintenance route uses Google sign-in and an
-`Administrators/{uid}` allow-list. This does not place identity controls on the
-tabletop surface; see ADR 0005.
+exact verified-email allow-list enforced by Firestore Rules. Only
+`anicolao@gmail.com` and `egirard@gmail.com` are editors. This does not place
+identity controls on the tabletop surface; see ADR 0005.
 
 Anonymous does not mean unauthenticated: every Firestore read carries a Firebase
 ID token and UID, so LauncherUI's existing `request.auth != null` catalogue rule
@@ -76,7 +77,7 @@ its edge, while one semantic status region supplies assistive output.
 - Preserve deny-by-default Firestore rules.
 - Catalogue reads require any authenticated Firebase user.
 - Catalogue writes are denied except for validated creates and updates by an
-  explicitly enabled administrator.
+  approved, verified Google email.
 - Deletes and writes outside the approved editor fields remain denied.
 - Production and live-preview origins are explicitly authorized before use.
 - Keep anonymous Auth enabled in the existing Firebase project; do not make the
@@ -92,20 +93,21 @@ while only the separately authorized editor adapter has a client write path.
 
 The PR deployment receives only Firebase's public web-app configuration through
 GitHub Actions secrets. It receives no service-account credential, Admin SDK
-credential, refresh token, or database mutation capability. Automated tests do
-not use this configuration and continue to run against the Auth and Firestore
-emulators.
+credential, or refresh token. Firestore Rules permit catalogue mutations only
+when a Google ID token contains one of the two approved verified emails.
+Automated tests do not use this configuration and continue to run against the
+Auth and Firestore emulators.
 
-## Editor bootstrap
+## Editor setup
 
 1. Enable Google as a Firebase Authentication provider for the existing project.
-2. Merge the `Applications` and `Administrators` rules from this repository into
-   the project's deployed rules without replacing unrelated LauncherUI rules,
-   then deploy the reviewed result.
-3. Visit `/ttlauncher/edit`, sign in, and copy the UID shown by the denied state.
-4. Create `Administrators/<uid>` with the boolean field `Enabled: true`.
-5. Reload the editor. Removing the document or setting `Enabled: false` revokes
-   access without changing the account.
+2. Merge the `Applications` rules from this repository into the project's
+   deployed rules without replacing unrelated LauncherUI rules, then deploy the
+   reviewed result.
+3. Visit `/ttlauncher/edit` in production or a same-repository PR preview and
+   sign in as `anicolao@gmail.com` or `egirard@gmail.com`.
+4. To change membership, update the exact email list in both `firestore.rules`
+   and the editor adapter, extend the rules/unit coverage, and deploy the rules.
 
 ## Auth E2E contract
 
@@ -118,5 +120,5 @@ Tests use the Auth emulator and the real invisible state machine:
   retry/status surfaces;
 - catalogue subscription begins only after ready auth;
 - the tabletop route offers no account or profile management; and
-- the editor proves signed-out, denied, authorized create/update, hide/show, and
-  sign-out behavior with emulator-only identities and data.
+- the editor proves signed-out, authorized create/update, hide/show, and
+  sign-out behavior with an emulator-only session and emulator data.

@@ -62,7 +62,7 @@ jobs:
           node-version: '22'
           cache: npm
           cache-dependency-path: source/package-lock.json
-      - name: Build interactive live-read preview
+      - name: Build interactive live preview
         working-directory: source
         env:
           PUBLIC_BASE_PATH: /${{ github.event.repository.name }}/pr-${{ github.event.pull_request.number }}
@@ -73,10 +73,11 @@ jobs:
           PUBLIC_FIREBASE_STORAGE_BUCKET: ${{ secrets.PUBLIC_FIREBASE_STORAGE_BUCKET }}
           PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
           PUBLIC_FIREBASE_APP_ID: ${{ secrets.PUBLIC_FIREBASE_APP_ID }}
+          PUBLIC_EDITOR_ENABLED: 'true'
         run: |
           for variable in PUBLIC_FIREBASE_API_KEY PUBLIC_FIREBASE_AUTH_DOMAIN PUBLIC_FIREBASE_PROJECT_ID PUBLIC_FIREBASE_APP_ID; do
             if [[ -z "${!variable}" ]]; then
-              echo "Required live-read configuration is missing: ${variable}" >&2
+              echo "Required live configuration is missing: ${variable}" >&2
               exit 1
             fi
           done
@@ -126,4 +127,4 @@ jobs:
           --repo "$GITHUB_REPOSITORY"
           --edit-last
           --create-if-none
-          --body "Interactive launcher preview: [$PREVIEW_URL]($PREVIEW_URL) · data mode: live-read · existing LauncherUI Applications catalogue · anonymous auth · no client writes"
+          --body "Interactive launcher preview: [$PREVIEW_URL]($PREVIEW_URL) · data mode: live · existing LauncherUI Applications catalogue · anonymous launcher auth · editor writes restricted by Firestore Rules to the approved Google accounts"

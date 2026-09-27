@@ -1,5 +1,4 @@
 import { expect, test, type Page } from '@playwright/test';
-import { authorizeCatalogueEditor } from './helpers/catalogue-admin';
 import { TestStepHelper } from './helpers/test-step-helper';
 
 async function openLauncher(page: Page) {
@@ -204,19 +203,16 @@ test('an approved editor adds a game and toggles its launcher visibility', async
     page.waitForEvent('popup'),
     page.getByRole('button', { name: 'Sign in with Google' }).click()
   ]);
-  // The third-party Auth Emulator handler leaves its account form display:none
-  // when reduced motion is forced. The application page stays reduced-motion;
-  // only the emulator-owned popup uses its normal transition.
-  await popup.emulateMedia({ reducedMotion: 'no-preference' });
-  await popup.getByRole('button', { name: /Add new account/ }).click();
-  await popup.getByLabel('Email').fill('catalogue-editor@example.test');
+  // Dispatch on the Auth Emulator's owning list item so its handler is not
+  // subject to the asynchronously loaded Material button's event interception.
+  await popup.waitForFunction('typeof toggleForm === "function"');
+  await popup.locator('#add-account-button').dispatchEvent('click');
+  const emailInput = popup.getByLabel('Email');
+  await expect(emailInput).toBeVisible();
+  await emailInput.fill('anicolao@gmail.com');
   await popup.getByRole('button', { name: 'Sign in with Google.com' }).click();
   await popup.waitForEvent('close');
 
-  await expect(page.getByRole('heading', { name: 'This account is not an editor' })).toBeVisible();
-  const uid = await page.locator('.gate code').innerText();
-  await authorizeCatalogueEditor(uid);
-  await page.reload();
   await expect(editorSurface).toHaveAttribute('data-status', 'ready');
 
   await steps.step('catalogue-editor-authorized', {

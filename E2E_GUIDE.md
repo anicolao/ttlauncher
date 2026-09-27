@@ -25,8 +25,8 @@ isolated Firebase emulators.
   coordinates/orientation bands, angle wrapping, and tap-versus-drag reducer.
 - **Component:** semantic tile names, pointer capture/cancel, pressed state,
   repeated edge status, and exact launch command count.
-- **Rules:** authenticated `Applications` reads plus unauthenticated and all-write
-  denial.
+- **Rules:** authenticated `Applications` reads, allow-listed verified editor
+  writes, field validation, and all other write denial.
 - **E2E:** anonymous session, emulator catalogue, radial layout, multi-edge touch,
   drag browsing, direct launch, editor authorization/create/visibility, offline
   and error states, and multi-touch safety.
@@ -90,7 +90,7 @@ await steps.step('east-ready', {
 | Icons | Local fictional fixture icons with explicit dimensions |
 | Service workers | Blocked unless an offline-cache scenario owns them |
 | Backend | Auth + Firestore emulators on fixed ports |
-| Identity | Real emulator anonymous user |
+| Identity | Real emulator anonymous launcher and Google editor users |
 | Catalogue | Versioned `Applications` seed using only Title/Icon/URL |
 | Network | Online unless a test explicitly toggles it |
 
@@ -109,8 +109,8 @@ The Playwright web server runs inside one
 5. run with one worker until isolation and fixed ports are redesigned; and
 6. tear down the whole process.
 
-Tests that alter the catalogue do so through the emulator admin helper before a
-page subscribes. No test depends on order or an emulator left running locally.
+Tests that alter the catalogue do so through the editor against the emulators.
+No test depends on order or an emulator left running locally.
 
 ## Coordinate model for edge approaches
 
