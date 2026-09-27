@@ -100,14 +100,6 @@
     await editor.setApplicationHidden(id, hidden);
   }
 
-  async function copyUid(uid: string) {
-    await navigator.clipboard.writeText(uid);
-    authMessage = 'User ID copied.';
-  }
-
-  async function copyDeniedUid() {
-    if (session.status === 'denied') await copyUid(session.uid);
-  }
 </script>
 
 <svelte:head>
@@ -131,7 +123,7 @@
     {/if}
   </header>
 
-  {#if session.status === 'loading' || session.status === 'checking'}
+  {#if session.status === 'loading'}
     <section class="gate" aria-live="polite">
       <h2>Checking access…</h2>
       <p>The editor stays locked until Firebase verifies this account.</p>
@@ -146,10 +138,8 @@
   {:else if session.status === 'denied'}
     <section class="gate denied">
       <h2>This account is not an editor</h2>
-      <p><strong>{session.email}</strong> signed in successfully, but its user ID is not in the administrator allow-list.</p>
-      <code>{session.uid}</code>
+      <p><strong>{session.email}</strong> signed in successfully, but this verified email address is not in the editor allow-list.</p>
       <div class="gate-actions">
-        <button class="secondary" type="button" on:click={copyDeniedUid}>Copy user ID</button>
         <button class="secondary" type="button" on:click={signOut}>Use another account</button>
       </div>
       <output aria-live="polite">{authMessage}</output>
@@ -161,6 +151,9 @@
       <button class="secondary" type="button" on:click={() => location.reload()}>Retry</button>
     </section>
   {:else if session.status === 'authorized'}
+    <aside class="live-notice" aria-label="Live catalogue notice">
+      Changes save to the shared LauncherUI catalogue and appear in the launcher immediately.
+    </aside>
     <section class="new-game" aria-labelledby="new-game-title">
       <div>
         <p class="eyebrow">New catalogue entry</p>
@@ -231,12 +224,12 @@
   .gate { min-height: 24rem; display: grid; place-content: center; justify-items: start; gap: 1rem; }
   .gate h2 { margin: 0; font-size: 2.25rem; }
   .gate p { max-width: 45rem; margin: 0; font-size: 1.15rem; }
-  .gate code { max-width: 100%; border-radius: .5rem; padding: .75rem; overflow-wrap: anywhere; color: #123847; background: #dce9ed; }
   .gate-actions { display: flex; gap: .7rem; }
   .primary { min-height: 3.2rem; border: 0; border-radius: .7rem; padding: .7rem 1.25rem; color: #fff; background: #076673; font: inherit; font-weight: 700; cursor: pointer; }
   .primary:disabled { cursor: wait; opacity: .55; }
   button:focus-visible, input:focus-visible, a:focus-visible { outline: .2rem solid #087e8b; outline-offset: .18rem; }
   output { min-height: 1.4em; color: #862e26; font-weight: 700; }
+  .live-notice { max-width: 100rem; margin: 0 auto 1rem; border: 1px solid #b47b16; border-radius: .8rem; padding: .8rem 1rem; color: #633c00; background: #fff2c9; font-weight: 700; }
   .new-game { display: grid; grid-template-columns: minmax(16rem, .7fr) minmax(34rem, 1.3fr); gap: clamp(2rem, 4vw, 5rem); margin-bottom: 2rem; }
   .new-game h2, .catalogue h2 { margin: .2rem 0 .5rem; font-size: 2rem; }
   .new-game p { margin: 0; }

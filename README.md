@@ -33,13 +33,14 @@ Every change pushed to `main` is deployed after repository validation to:
 <https://anicolao.github.io/ttlauncher/>
 
 Approved catalogue administrators can add, edit, show, and hide games at
-`/ttlauncher/edit`. See [authentication](docs/AUTHENTICATION.md#editor-bootstrap)
-for the one-time Firebase setup.
+`/ttlauncher/edit`. See [authentication](docs/AUTHENTICATION.md#editor-setup)
+for the Firebase setup and exact email allow-list.
 
-Every same-repository pull request builds the launcher in read-only live mode at
-a PR-specific GitHub Pages path and posts the link on the PR. It authenticates
-anonymously and displays the existing LauncherUI `Applications` catalogue. PR 1
-is available at:
+Every same-repository pull request builds the launcher in live Firebase mode at
+a PR-specific GitHub Pages path and posts the link on the PR. The tabletop route
+authenticates anonymously and displays the existing LauncherUI `Applications`
+catalogue; the two approved Google accounts can fully test `/edit` there. PR 1 is
+available at:
 
 <https://anicolao.github.io/ttlauncher/pr-1/>
 

@@ -9,7 +9,6 @@ import {
   collection,
   deleteField,
   doc,
-  getDoc,
   onSnapshot,
   orderBy,
   query,
@@ -36,10 +35,14 @@ export interface ApplicationDraft {
 export type EditorSession =
   | { status: 'loading' }
   | { status: 'signed-out' }
-  | { status: 'checking'; email: string }
-  | { status: 'authorized'; email: string; uid: string }
-  | { status: 'denied'; email: string; uid: string }
+  | { status: 'authorized'; email: string }
+  | { status: 'denied'; email: string }
   | { status: 'error'; message: string };
+
+export const CATALOGUE_EDITOR_EMAILS = [
+  'anicolao@gmail.com',
+  'egirard@gmail.com'
+] as const;
 
 export type EditorApplications =
   | { status: 'loading'; applications: EditableApplication[] }
@@ -65,30 +68,19 @@ export async function createCatalogueEditor(): Promise<CatalogueEditor> {
 
   return {
     subscribeSession(listener) {
-      let observation = 0;
       listener({ status: 'loading' });
       return onAuthStateChanged(
         auth,
-        async (user) => {
-          const currentObservation = ++observation;
+        (user) => {
           if (!user || user.isAnonymous) {
             listener({ status: 'signed-out' });
             return;
           }
 
           const email = user.email ?? 'Signed-in account';
-          listener({ status: 'checking', email });
-          try {
-            const authorization = await getDoc(doc(db, 'Administrators', user.uid));
-            if (currentObservation !== observation) return;
-            listener(authorization.exists()
-              ? { status: 'authorized', email, uid: user.uid }
-              : { status: 'denied', email, uid: user.uid });
-          } catch {
-            if (currentObservation === observation) {
-              listener({ status: 'error', message: 'Could not verify editor access.' });
-            }
-          }
+          listener(isCatalogueEditor(email, user.emailVerified)
+            ? { status: 'authorized', email }
+            : { status: 'denied', email });
         },
         () => listener({ status: 'error', message: 'Could not restore the sign-in session.' })
       );
@@ -143,6 +135,12 @@ export async function createCatalogueEditor(): Promise<CatalogueEditor> {
       await updateDoc(doc(applications, id), { Hidden: hidden });
     }
   };
+}
+
+export function isCatalogueEditor(email: string | null, emailVerified: boolean): boolean {
+  return emailVerified
+    && email !== null
+    && CATALOGUE_EDITOR_EMAILS.includes(email as typeof CATALOGUE_EDITOR_EMAILS[number]);
 }
 
 export function validateDraft(draft: ApplicationDraft): ApplicationDraft {

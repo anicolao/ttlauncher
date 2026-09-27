@@ -97,7 +97,7 @@ one command; no details/modal/setup/confirmation route exists.
 - Configure protected production deployment and build provenance.
 - Run same-database comparison and rehearse Hosting rollback.
 
-Exit criteria: all verification passes, live-read preview is approved, the
+Exit criteria: all verification passes, live Firebase preview is approved, the
 physical four-side checklist is recorded, and rollback is proven.
 
 ## Workstream map
@@ -135,5 +135,5 @@ physical four-side checklist is recorded, and rollback is proven.
 | Multi-touch corrupts ring state | Pointer capture policy and simultaneous-hand tests |
 | Legacy malformed record | Runtime parser, safe omission/fallback |
 | Anonymous provider disabled | Explicit production prerequisite |
-| Preview touches production | Fixture default; protected live-read; editor writes disabled |
+| Preview touches production | Fork-safe fixture validation; same-repository deploy only; editor writes restricted to two verified Google emails and clearly labelled live |
 | Rollback needs data restore | No bulk migration; `Hidden` remains backward-compatible |

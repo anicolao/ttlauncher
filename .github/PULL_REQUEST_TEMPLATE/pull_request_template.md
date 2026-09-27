@@ -8,7 +8,7 @@
 
 ## Data and auth impact
 
-- Preview data mode: <!-- fixture | live-read -->
+- Preview data mode: <!-- fixture | live -->
 - Firestore reads/writes changed: <!-- no / explain -->
 - Auth behavior changed: <!-- no / explain -->
 - Migration and rollback: <!-- none / link -->

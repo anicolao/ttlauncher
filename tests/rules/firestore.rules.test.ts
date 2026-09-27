@@ -23,9 +23,6 @@ beforeAll(async () => {
     await setDoc(doc(context.firestore(), 'Applications', 'caravan'), {
       Title: 'Caravan', Icon: '/icons/caravan.svg', URL: 'https://games.example.test/caravan'
     });
-    await setDoc(doc(context.firestore(), 'Administrators', 'catalogue-editor'), {
-      Enabled: true
-    });
   });
 });
 
@@ -49,7 +46,7 @@ describe('catalogue rules', () => {
 
   it('allows an authorized editor to add, edit, and hide a valid application', async () => {
     const db = environment.authenticatedContext('catalogue-editor', {
-      email: 'editor@example.test',
+      email: 'anicolao@gmail.com',
       email_verified: true
     }).firestore();
     const application = doc(db, 'Applications', 'snappy-maria');
@@ -62,7 +59,17 @@ describe('catalogue rules', () => {
     await assertSucceeds(updateDoc(application, { Title: 'Snappy Maria Debug' }));
   });
 
-  it('denies writes from a signed-in account without administrator authorization', async () => {
+  it('allows the second approved verified editor email', async () => {
+    const db = environment.authenticatedContext('second-editor', {
+      email: 'egirard@gmail.com',
+      email_verified: true
+    }).firestore();
+    await assertSucceeds(setDoc(doc(db, 'Applications', 'second-editor-game'), {
+      Title: 'Second Editor Game', URL: 'https://games.example.test/second-editor-game'
+    }));
+  });
+
+  it('denies writes from a signed-in account outside the email allow-list', async () => {
     const db = environment.authenticatedContext('not-an-editor', {
       email: 'visitor@example.test',
       email_verified: true
@@ -73,7 +80,10 @@ describe('catalogue rules', () => {
   });
 
   it('rejects unsafe editor writes and catalogue deletion', async () => {
-    const db = environment.authenticatedContext('catalogue-editor').firestore();
+    const db = environment.authenticatedContext('catalogue-editor', {
+      email: 'anicolao@gmail.com',
+      email_verified: true
+    }).firestore();
     await assertFails(setDoc(doc(db, 'Applications', 'unsafe'), {
       Title: 'Unsafe', URL: 'javascript:alert(1)'
     }));
@@ -89,15 +99,26 @@ describe('catalogue rules', () => {
     await assertFails(deleteDoc(doc(db, 'Applications', 'caravan')));
   });
 
-  it('allows an account to check only its own editor authorization', async () => {
-    const editor = environment.authenticatedContext('catalogue-editor').firestore();
-    const visitor = environment.authenticatedContext('not-an-editor').firestore();
-    await assertSucceeds(getDoc(doc(editor, 'Administrators', 'catalogue-editor')));
-    await assertFails(getDoc(doc(visitor, 'Administrators', 'catalogue-editor')));
+  it('denies an allow-listed email without a verified provider claim', async () => {
+    const db = environment.authenticatedContext('unverified-editor', {
+      email: 'anicolao@gmail.com',
+      email_verified: false
+    }).firestore();
+    await assertFails(setDoc(doc(db, 'Applications', 'unverified-game'), {
+      Title: 'Nope', URL: 'https://games.example.test/nope'
+    }));
   });
 
   it('denies reads outside the legacy catalogue', async () => {
     const db = environment.authenticatedContext('table-appliance').firestore();
     await assertFails(getDoc(doc(db, 'Users', 'table-appliance')));
+  });
+
+  it('preserves existing access to an account own lowercase users document', async () => {
+    const owner = environment.authenticatedContext('table-appliance').firestore();
+    const other = environment.authenticatedContext('other-appliance').firestore();
+    await assertSucceeds(setDoc(doc(owner, 'users', 'table-appliance'), { theme: 'legacy' }));
+    await assertSucceeds(getDoc(doc(owner, 'users', 'table-appliance')));
+    await assertFails(getDoc(doc(other, 'users', 'table-appliance')));
   });
 });
