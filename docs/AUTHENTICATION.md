@@ -2,9 +2,13 @@
 
 ## Decision
 
-Use Firebase anonymous authentication silently in every environment. There is
-no sign-in route, account prompt, profile, Google link, sign-out control, or
-identity-dependent launcher feature.
+Use Firebase anonymous authentication silently on the tabletop launcher in every
+environment. There is no account prompt, profile, Google link, sign-out control,
+or identity-dependent launcher feature on that route.
+
+The separately addressed `/edit` maintenance route uses Google sign-in and an
+`Administrators/{uid}` allow-list. This does not place identity controls on the
+tabletop surface; see ADR 0005.
 
 Anonymous does not mean unauthenticated: every Firestore read carries a Firebase
 ID token and UID, so LauncherUI's existing `request.auth != null` catalogue rule
@@ -71,8 +75,9 @@ its edge, while one semantic status region supplies assistive output.
 
 - Preserve deny-by-default Firestore rules.
 - Catalogue reads require any authenticated Firebase user.
-- Catalogue writes remain denied.
-- Version one makes no client Firestore writes.
+- Catalogue writes are denied except for validated creates and updates by an
+  explicitly enabled administrator.
+- Deletes and writes outside the approved editor fields remain denied.
 - Production and live-preview origins are explicitly authorized before use.
 - Keep anonymous Auth enabled in the existing Firebase project; do not make the
   catalogue public to simulate guest access.
@@ -81,15 +86,26 @@ its edge, while one semantic status region supplies assistive output.
 
 Anonymous authentication was enabled for the existing `launcherui` Firebase
 project on 2026-08-03. The `anicolao.github.io` preview origin was added to the
-project's authorized domains at the same time. The change preserves the existing
-Firestore boundary: authenticated clients may read `Applications`, while this
-launcher has no client write path and the database rules continue to deny writes.
+project's authorized domains at the same time. The tabletop path preserves the
+existing Firestore boundary: authenticated clients may read `Applications`,
+while only the separately authorized editor adapter has a client write path.
 
 The PR deployment receives only Firebase's public web-app configuration through
 GitHub Actions secrets. It receives no service-account credential, Admin SDK
 credential, refresh token, or database mutation capability. Automated tests do
 not use this configuration and continue to run against the Auth and Firestore
 emulators.
+
+## Editor bootstrap
+
+1. Enable Google as a Firebase Authentication provider for the existing project.
+2. Merge the `Applications` and `Administrators` rules from this repository into
+   the project's deployed rules without replacing unrelated LauncherUI rules,
+   then deploy the reviewed result.
+3. Visit `/ttlauncher/edit`, sign in, and copy the UID shown by the denied state.
+4. Create `Administrators/<uid>` with the boolean field `Enabled: true`.
+5. Reload the editor. Removing the document or setting `Enabled: false` revokes
+   access without changing the account.
 
 ## Auth E2E contract
 
@@ -101,4 +117,6 @@ Tests use the Auth emulator and the real invisible state machine:
 - auth-unavailable and permission-denied states show four equivalent edge-facing
   retry/status surfaces;
 - catalogue subscription begins only after ready auth;
-- no route, control, or visible copy offers account or profile management.
+- the tabletop route offers no account or profile management; and
+- the editor proves signed-out, denied, authorized create/update, hide/show, and
+  sign-out behavior with emulator-only identities and data.

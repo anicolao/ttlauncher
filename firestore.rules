@@ -2,9 +2,42 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function catalogueEditor() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/Administrators/$(request.auth.uid))
+        && get(/databases/$(database)/documents/Administrators/$(request.auth.uid)).data.Enabled == true;
+    }
+
+    function validApplication() {
+      return request.resource.data.Title is string
+        && request.resource.data.Title.size() > 0
+        && request.resource.data.Title.size() <= 120
+        && request.resource.data.Title.matches('.*[^\\s].*')
+        && request.resource.data.URL is string
+        && request.resource.data.URL.matches('^https://[^@\\s]+$')
+        && (!('Icon' in request.resource.data) || request.resource.data.Icon is string)
+        && (!('Hidden' in request.resource.data) || request.resource.data.Hidden is bool);
+    }
+
     match /Applications/{document=**} {
-      allow read: if request.auth != null;
-      allow write: if false;
+      allow read: if signedIn();
+      allow create: if catalogueEditor()
+        && request.resource.data.keys().hasOnly(['Title', 'URL', 'Icon', 'Hidden'])
+        && validApplication();
+      allow update: if catalogueEditor()
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['Title', 'URL', 'Icon', 'Hidden'])
+        && validApplication();
+      allow delete: if false;
+    }
+
+    match /Administrators/{administratorId} {
+      allow get: if signedIn() && request.auth.uid == administratorId;
+      allow list, write: if false;
     }
 
     match /{document=**} {

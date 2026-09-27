@@ -23,15 +23,15 @@ launcher state ─────── auth / catalogue / ring angle / connection 
 domain adapters ───── validate legacy records, URL policy, radial geometry
         │
         ▼
-Firebase gateway ──── anonymous Auth + read-only Applications subscription
+Firebase adapters ─── anonymous launcher reads + authorized editor writes
         │
         ▼
 existing LauncherUI Firebase project
 ```
 
-Only the gateway imports Firebase. Only the catalogue adapter knows
-`Applications`, `Title`, `URL`, and `Icon`. Only the launch policy may turn a
-validated URL into navigation.
+Only data adapters import Firebase. Only catalogue adapters know `Applications`,
+`Title`, `URL`, `Icon`, and the storage-only `Hidden` flag. Only the launch policy
+may turn a validated URL into navigation.
 
 ## Implemented source layout
 
@@ -42,13 +42,16 @@ src/
     domain/             # GameTile parsing, paging, and ring geometry
   routes/
     +layout.ts          # static application boundary
-    +page.svelte       # the only product surface and pointer controller
+    +page.svelte        # tabletop surface and pointer controller
+    edit/+page.svelte   # separately authenticated maintenance surface
 tests/
   rules/
   e2e/
 ```
 
-There is no detail, profile, settings, or sign-in route.
+There is no detail, profile, settings, or sign-in control on the tabletop route.
+The unlinked `/edit` route is an explicit maintenance boundary, not part of game
+selection or launch.
 
 ## State model
 

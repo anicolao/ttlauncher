@@ -16,7 +16,8 @@ This PR previews the runnable omnidirectional launcher against the existing
 LauncherUI `Applications` catalogue. Reviewers can stream the current production
 games through the right-side radial wiper in either direction, tap the logo to animate to
 the next eight-game boundary, and exercise the real launch URLs.
-Authentication is anonymous and silent; the client has no Firestore write path.
+Tabletop authentication is anonymous and silent. The editor write path is
+disabled in PR builds, so live-read previews cannot mutate production.
 
 ## Application preview modes
 
@@ -25,9 +26,9 @@ Preview builds declare a mode in four small edge-facing labels:
 | Mode | Source | Auth | Writes | Use |
 | --- | --- | --- | --- | --- |
 | `fixture` | Versioned local catalogue | In-memory ready state | None | Validation builds and fork-safe visual review |
-| `live-read` (same-repository PR default) | Existing LauncherUI Firestore | Real anonymous Firebase auth | None | Trusted compatibility review |
-| `emulator` | Local Firebase emulators | Auth emulator | None | Developer and automated E2E |
-| `production` | Existing LauncherUI Firebase | Real anonymous auth | None | Released table only |
+| `live-read` (same-repository PR default) | Existing LauncherUI Firestore | Real anonymous Firebase auth | Editor disabled | Trusted compatibility review |
+| `emulator` | Local Firebase emulators | Auth emulator | Authorized test writes | Developer and automated E2E |
+| `production` | Existing LauncherUI Firebase | Anonymous launcher / Google editor | Authorized editor writes | Released table and maintenance route |
 
 Mode is a required build-time variable. Unknown mode fails closed; hostname
 guessing is forbidden.
@@ -50,7 +51,8 @@ smoke checks verify:
 - Live-read is allowed only for branches in this repository, never forks, and
   uses repository/environment secrets for public Firebase web configuration.
 - Do not give previews service-account keys or Firebase Admin access.
-- The app code has no Firestore write path in any mode.
+- PR builds fail closed with the editor disabled. Do not sign an administrator
+  account into untrusted builds; Firestore Rules remain the write boundary.
 - Firebase rules and authorized origins remain the security boundary.
 
 ## GitHub Pages setup and cleanup
