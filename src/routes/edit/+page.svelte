@@ -136,9 +136,10 @@
       <output aria-live="polite">{authMessage}</output>
     </section>
   {:else if session.status === 'denied'}
-    <section class="gate denied">
+    <section class="gate denied" data-user-id={session.uid}>
       <h2>This account is not an editor</h2>
-      <p><strong>{session.email}</strong> signed in successfully, but this verified email address is not in the editor allow-list.</p>
+      <p><strong>{session.email}</strong> signed in successfully, but its user record does not grant catalogue editor access.</p>
+      <p>Ask an administrator to set <code>catalogueEditor</code> to <code>true</code> on <code>users/{session.uid}</code>.</p>
       <div class="gate-actions">
         <button class="secondary" type="button" on:click={signOut}>Use another account</button>
       </div>
@@ -224,6 +225,7 @@
   .gate { min-height: 24rem; display: grid; place-content: center; justify-items: start; gap: 1rem; }
   .gate h2 { margin: 0; font-size: 2.25rem; }
   .gate p { max-width: 45rem; margin: 0; font-size: 1.15rem; }
+  .gate code { font-size: .92em; overflow-wrap: anywhere; }
   .gate-actions { display: flex; gap: .7rem; }
   .primary { min-height: 3.2rem; border: 0; border-radius: .7rem; padding: .7rem 1.25rem; color: #fff; background: #076673; font: inherit; font-weight: 700; cursor: pointer; }
   .primary:disabled { cursor: wait; opacity: .55; }

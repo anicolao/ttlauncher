@@ -25,8 +25,8 @@ isolated Firebase emulators.
   coordinates/orientation bands, angle wrapping, and tap-versus-drag reducer.
 - **Component:** semantic tile names, pointer capture/cancel, pressed state,
   repeated edge status, and exact launch command count.
-- **Rules:** authenticated `Applications` reads, allow-listed verified editor
-  writes, field validation, and all other write denial.
+- **Rules:** authenticated `Applications` reads, user-profile-authorized editor
+  writes, protected role assignment, field validation, and all other write denial.
 - **E2E:** anonymous session, emulator catalogue, radial layout, multi-edge touch,
   drag browsing, direct launch, editor authorization/create/visibility, offline
   and error states, and multi-touch safety.
@@ -199,7 +199,7 @@ invalid scheme, popup-blocked/error feedback, and exactly-once dispatch.
 | 005 | Swipe/arbitration | handles, empty track, tile drag, thresholds, cancel, settle |
 | 006 | Resilience | cached offline ring, reconnect, empty, permission/error retry |
 | 007 | Multi-touch/a11y | simultaneous pointers, reduced motion, forced colours, service keyboard |
-| 008 | Catalogue editor | Google emulator sign-in, allow-list denial/grant, add, hide/show, launcher filtering |
+| 008 | Catalogue editor | Google emulator sign-in, user-field denial/grant, add, hide/show, launcher filtering |
 
 ## Visual baseline policy
 

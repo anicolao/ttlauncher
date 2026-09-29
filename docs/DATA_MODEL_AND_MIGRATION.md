@@ -64,8 +64,8 @@ preferences. The launcher cannot promise facts its backend does not supply.
 
 The tabletop route does not read or write `users/{uid}`. Its anonymous Firebase
 Auth session exists solely to satisfy the authenticated catalogue rule. The
-separate maintenance route authorizes only the two verified Google emails named
-in Firestore Rules.
+separate maintenance route records the signed-in Google email and reads the
+`catalogueEditor` authorization field from its own `users/{uid}` document.
 
 ## Cache
 
@@ -84,20 +84,23 @@ Version one preserves the effective production boundary:
 ```text
 Applications/{document=**}
   read: authenticated
-  create/update: approved verified emails only; validated catalogue fields
+  create/update: users with catalogueEditor == true; validated catalogue fields
   delete: denied
 
 users/{uid}
-  read/write: matching signed-in uid only (preserved LauncherUI compatibility)
+  read: matching signed-in uid only
+  create/update: matching signed-in uid, except catalogueEditor is protected
+  delete: matching signed-in uid (self-revocation is safe)
 
 everything else used by this client
   denied
 ```
 
 Existing unrelated rules may remain for compatibility. Rules tests prove
-authenticated reads, unauthenticated denial, anonymous, unverified, and
-non-editor write denial, both approved editors, field validation, approved
-editor create/update, preserved `users/{uid}` access, and delete denial.
+authenticated reads, unauthenticated and anonymous write denial, non-editor
+write denial, profile-granted editor access, field validation, approved editor
+create/update, protected `catalogueEditor` membership, preserved `users/{uid}`
+access, and application delete denial.
 
 ## Migration and rollout
 

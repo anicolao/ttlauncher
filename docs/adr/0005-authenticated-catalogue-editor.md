@@ -17,10 +17,12 @@ legacy `Title`, `URL`, and `Icon` fields remain the production source of truth.
 ## Decision
 
 Add a separately addressed `/edit` maintenance route. It requires Google sign-in
-and an exact verified-email allow-list. Firestore Rules authorize only
-`anicolao@gmail.com` and `egirard@gmail.com`; a matching client check provides an
-early denied state but is not the security boundary. Anonymous sessions,
-unverified email claims, and all other signed-in accounts remain read-only.
+and an explicit authorization field on the signed-in account's user document.
+Firestore Rules authorize catalogue changes only when
+`users/{request.auth.uid}.catalogueEditor` is exactly `true`. Clients may create
+and update their own ordinary profile fields, including recording the Google
+account email, but cannot add or alter `catalogueEditor`. Anonymous sessions and
+all users without the field remain read-only.
 
 Same-repository PR previews enable this editor against the shared LauncherUI
 project so catalogue maintenance can be tested before merge. The editor displays
@@ -41,8 +43,9 @@ link, sign-in prompt, profile, or editor controls.
 
 - Google Auth must be enabled in the existing Firebase project.
 - Firestore Rules must be deployed before the editor can write production data.
-- Changing editor membership requires a reviewed rules and client allow-list
-  change; there is no mutable authorization collection to misconfigure.
+- An administrator changes editor membership in the existing `users` collection
+  through the Firebase console or Admin SDK; no application deployment is needed.
+- Email is recorded for identification but is not an authorization key.
 - Approved edits made from a PR preview affect the live shared catalogue.
 - Existing application documents require no migration and remain visible.
 - Rollback can remove the editor while harmless `Hidden: false` values remain.

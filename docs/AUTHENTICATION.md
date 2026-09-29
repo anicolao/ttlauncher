@@ -7,9 +7,10 @@ environment. There is no account prompt, profile, Google link, sign-out control,
 or identity-dependent launcher feature on that route.
 
 The separately addressed `/edit` maintenance route uses Google sign-in and an
-exact verified-email allow-list enforced by Firestore Rules. Only
-`anicolao@gmail.com` and `egirard@gmail.com` are editors. This does not place
-identity controls on the tabletop surface; see ADR 0005.
+explicit `catalogueEditor: true` field on the signed-in account's
+`users/{uid}` document. Firestore Rules enforce that field and prevent clients
+from adding or changing it themselves. This does not place identity controls on
+the tabletop surface; see ADR 0005.
 
 Anonymous does not mean unauthenticated: every Firestore read carries a Firebase
 ID token and UID, so LauncherUI's existing `request.auth != null` catalogue rule
@@ -77,7 +78,7 @@ its edge, while one semantic status region supplies assistive output.
 - Preserve deny-by-default Firestore rules.
 - Catalogue reads require any authenticated Firebase user.
 - Catalogue writes are denied except for validated creates and updates by an
-  approved, verified Google email.
+  authenticated user whose profile explicitly grants catalogue editor access.
 - Deletes and writes outside the approved editor fields remain denied.
 - Production and live-preview origins are explicitly authorized before use.
 - Keep anonymous Auth enabled in the existing Firebase project; do not make the
@@ -94,7 +95,7 @@ while only the separately authorized editor adapter has a client write path.
 The PR deployment receives only Firebase's public web-app configuration through
 GitHub Actions secrets. It receives no service-account credential, Admin SDK
 credential, or refresh token. Firestore Rules permit catalogue mutations only
-when a Google ID token contains one of the two approved verified emails.
+when the authenticated UID's `users/{uid}` document has `catalogueEditor: true`.
 Automated tests do not use this configuration and continue to run against the
 Auth and Firestore emulators.
 
@@ -105,9 +106,15 @@ Auth and Firestore emulators.
    deployed rules without replacing unrelated LauncherUI rules, then deploy the
    reviewed result.
 3. Visit `/ttlauncher/edit` in production or a same-repository PR preview and
-   sign in as `anicolao@gmail.com` or `egirard@gmail.com`.
-4. To change membership, update the exact email list in both `firestore.rules`
-   and the editor adapter, extend the rules/unit coverage, and deploy the rules.
+   sign in with the intended Google account. The editor records the account's
+   Firebase Auth email on its own `users/{uid}` document and shows the UID while
+   access is pending.
+4. Using the Firebase console or Admin SDK, set `catalogueEditor` to `true` on
+   that exact user document. The authorized accounts are currently
+   `anicolao@gmail.com` and `eugene.girard@gmail.com`; email is informational and
+   is not the authorization key.
+5. To revoke access, use the Firebase console or Admin SDK to remove the field or
+   set it to `false`. Client rules reject all attempts to change this field.
 
 ## Auth E2E contract
 
@@ -120,5 +127,6 @@ Tests use the Auth emulator and the real invisible state machine:
   retry/status surfaces;
 - catalogue subscription begins only after ready auth;
 - the tabletop route offers no account or profile management; and
-- the editor proves signed-out, authorized create/update, hide/show, and
-  sign-out behavior with an emulator-only session and emulator data.
+- the editor proves signed-out, denied-before-grant, authorized create/update,
+  hide/show, and sign-out behavior with an emulator-only session and emulator
+  data.

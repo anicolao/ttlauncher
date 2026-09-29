@@ -23,6 +23,12 @@ beforeAll(async () => {
     await setDoc(doc(context.firestore(), 'Applications', 'caravan'), {
       Title: 'Caravan', Icon: '/icons/caravan.svg', URL: 'https://games.example.test/caravan'
     });
+    await setDoc(doc(context.firestore(), 'users', 'catalogue-editor'), {
+      email: 'anicolao@gmail.com', catalogueEditor: true
+    });
+    await setDoc(doc(context.firestore(), 'users', 'second-editor'), {
+      email: 'eugene.girard@gmail.com', catalogueEditor: true
+    });
   });
 });
 
@@ -46,8 +52,7 @@ describe('catalogue rules', () => {
 
   it('allows an authorized editor to add, edit, and hide a valid application', async () => {
     const db = environment.authenticatedContext('catalogue-editor', {
-      email: 'anicolao@gmail.com',
-      email_verified: true
+      email: 'anicolao@gmail.com'
     }).firestore();
     const application = doc(db, 'Applications', 'snappy-maria');
     await assertSucceeds(setDoc(application, {
@@ -59,17 +64,16 @@ describe('catalogue rules', () => {
     await assertSucceeds(updateDoc(application, { Title: 'Snappy Maria Debug' }));
   });
 
-  it('allows the second approved verified editor email', async () => {
+  it('allows a second user whose profile grants editor access', async () => {
     const db = environment.authenticatedContext('second-editor', {
-      email: 'egirard@gmail.com',
-      email_verified: true
+      email: 'eugene.girard@gmail.com'
     }).firestore();
     await assertSucceeds(setDoc(doc(db, 'Applications', 'second-editor-game'), {
       Title: 'Second Editor Game', URL: 'https://games.example.test/second-editor-game'
     }));
   });
 
-  it('denies writes from a signed-in account outside the email allow-list', async () => {
+  it('denies writes from a signed-in account without the editor field', async () => {
     const db = environment.authenticatedContext('not-an-editor', {
       email: 'visitor@example.test',
       email_verified: true
@@ -81,8 +85,7 @@ describe('catalogue rules', () => {
 
   it('rejects unsafe editor writes and catalogue deletion', async () => {
     const db = environment.authenticatedContext('catalogue-editor', {
-      email: 'anicolao@gmail.com',
-      email_verified: true
+      email: 'anicolao@gmail.com'
     }).firestore();
     await assertFails(setDoc(doc(db, 'Applications', 'unsafe'), {
       Title: 'Unsafe', URL: 'javascript:alert(1)'
@@ -99,13 +102,33 @@ describe('catalogue rules', () => {
     await assertFails(deleteDoc(doc(db, 'Applications', 'caravan')));
   });
 
-  it('denies an allow-listed email without a verified provider claim', async () => {
-    const db = environment.authenticatedContext('unverified-editor', {
-      email: 'anicolao@gmail.com',
-      email_verified: false
+  it('does not grant access based on an email address', async () => {
+    const db = environment.authenticatedContext('same-email-without-access', {
+      email: 'anicolao@gmail.com'
     }).firestore();
-    await assertFails(setDoc(doc(db, 'Applications', 'unverified-game'), {
+    await assertFails(setDoc(doc(db, 'Applications', 'same-email-game'), {
       Title: 'Nope', URL: 'https://games.example.test/nope'
+    }));
+  });
+
+  it('prevents users from granting or changing their own editor access', async () => {
+    const ordinaryUser = environment.authenticatedContext('ordinary-user').firestore();
+    await assertFails(setDoc(doc(ordinaryUser, 'users', 'ordinary-user'), {
+      email: 'ordinary@example.test', catalogueEditor: true
+    }));
+    await assertSucceeds(setDoc(doc(ordinaryUser, 'users', 'ordinary-user'), {
+      email: 'ordinary@example.test'
+    }));
+    await assertFails(updateDoc(doc(ordinaryUser, 'users', 'ordinary-user'), {
+      catalogueEditor: true
+    }));
+
+    const editor = environment.authenticatedContext('catalogue-editor').firestore();
+    await assertFails(updateDoc(doc(editor, 'users', 'catalogue-editor'), {
+      catalogueEditor: false
+    }));
+    await assertSucceeds(updateDoc(doc(editor, 'users', 'catalogue-editor'), {
+      email: 'anicolao+updated@gmail.com'
     }));
   });
 

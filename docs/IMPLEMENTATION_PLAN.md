@@ -135,5 +135,5 @@ physical four-side checklist is recorded, and rollback is proven.
 | Multi-touch corrupts ring state | Pointer capture policy and simultaneous-hand tests |
 | Legacy malformed record | Runtime parser, safe omission/fallback |
 | Anonymous provider disabled | Explicit production prerequisite |
-| Preview touches production | Fork-safe fixture validation; same-repository deploy only; editor writes restricted to two verified Google emails and clearly labelled live |
+| Preview touches production | Fork-safe fixture validation; same-repository deploy only; editor writes restricted by protected user records and clearly labelled live |
 | Rollback needs data restore | No bulk migration; `Hidden` remains backward-compatible |
