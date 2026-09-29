@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { grantCatalogueEditorAccess } from './helpers/catalogue-editor-user';
 import { TestStepHelper } from './helpers/test-step-helper';
 
 async function openLauncher(page: Page) {
@@ -193,7 +194,7 @@ test('a game crosses the tunnel and center paging completes its boundary', async
   expect(popupCount).toBe(0);
 });
 
-test('an approved editor adds a game and toggles its launcher visibility', async ({ page }, testInfo) => {
+test('a user granted editor access adds a game and toggles its launcher visibility', async ({ page }, testInfo) => {
   const steps = new TestStepHelper(page, testInfo);
   const editorSurface = page.locator('[data-editor-layout]');
   await page.goto('/edit/');
@@ -209,10 +210,15 @@ test('an approved editor adds a game and toggles its launcher visibility', async
   await popup.locator('#add-account-button').dispatchEvent('click');
   const emailInput = popup.getByLabel('Email');
   await expect(emailInput).toBeVisible();
-  await emailInput.fill('anicolao@gmail.com');
+  await emailInput.fill('eugene.girard@gmail.com');
   await popup.getByRole('button', { name: 'Sign in with Google.com' }).click();
   await popup.waitForEvent('close');
 
+  await expect(page.getByRole('heading', { name: 'This account is not an editor' })).toBeVisible();
+  const uid = await page.locator('[data-user-id]').getAttribute('data-user-id');
+  expect(uid).not.toBeNull();
+  await grantCatalogueEditorAccess(uid!, 'eugene.girard@gmail.com');
+  await page.reload();
   await expect(editorSurface).toHaveAttribute('data-status', 'ready');
 
   await steps.step('catalogue-editor-authorized', {

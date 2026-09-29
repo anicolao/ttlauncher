@@ -8,11 +8,8 @@ service cloud.firestore {
 
     function catalogueEditor() {
       return signedIn()
-        && request.auth.token.email_verified == true
-        && request.auth.token.email in [
-          'anicolao@gmail.com',
-          'egirard@gmail.com'
-        ];
+        && get(/databases/$(database)/documents/users/$(request.auth.uid))
+          .data.catalogueEditor == true;
     }
 
     function validApplication() {
@@ -39,7 +36,15 @@ service cloud.firestore {
     }
 
     match /users/{uid} {
-      allow read, write: if signedIn() && request.auth.uid == uid;
+      allow read: if signedIn() && request.auth.uid == uid;
+      allow create: if signedIn()
+        && request.auth.uid == uid
+        && !('catalogueEditor' in request.resource.data);
+      allow update: if signedIn()
+        && request.auth.uid == uid
+        && !request.resource.data.diff(resource.data).affectedKeys()
+          .hasAny(['catalogueEditor']);
+      allow delete: if signedIn() && request.auth.uid == uid;
     }
 
     match /{document=**} {

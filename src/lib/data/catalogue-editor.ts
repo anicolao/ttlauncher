@@ -9,9 +9,11 @@ import {
   collection,
   deleteField,
   doc,
+  getDoc,
   onSnapshot,
   orderBy,
   query,
+  setDoc,
   updateDoc,
   type DocumentData
 } from 'firebase/firestore';
@@ -35,14 +37,9 @@ export interface ApplicationDraft {
 export type EditorSession =
   | { status: 'loading' }
   | { status: 'signed-out' }
-  | { status: 'authorized'; email: string }
-  | { status: 'denied'; email: string }
+  | { status: 'authorized'; email: string; uid: string }
+  | { status: 'denied'; email: string; uid: string }
   | { status: 'error'; message: string };
-
-export const CATALOGUE_EDITOR_EMAILS = [
-  'anicolao@gmail.com',
-  'egirard@gmail.com'
-] as const;
 
 export type EditorApplications =
   | { status: 'loading'; applications: EditableApplication[] }
@@ -68,22 +65,39 @@ export async function createCatalogueEditor(): Promise<CatalogueEditor> {
 
   return {
     subscribeSession(listener) {
+      let observation = 0;
       listener({ status: 'loading' });
-      return onAuthStateChanged(
+      const unsubscribe = onAuthStateChanged(
         auth,
-        (user) => {
+        async (user) => {
+          const currentObservation = ++observation;
           if (!user || user.isAnonymous) {
             listener({ status: 'signed-out' });
             return;
           }
 
           const email = user.email ?? 'Signed-in account';
-          listener(isCatalogueEditor(email, user.emailVerified)
-            ? { status: 'authorized', email }
-            : { status: 'denied', email });
+          listener({ status: 'loading' });
+          try {
+            const userReference = doc(db, 'users', user.uid);
+            await setDoc(userReference, { email: user.email ?? null }, { merge: true });
+            const profile = await getDoc(userReference);
+            if (currentObservation !== observation) return;
+            listener(isCatalogueEditorProfile(profile.data())
+              ? { status: 'authorized', email, uid: user.uid }
+              : { status: 'denied', email, uid: user.uid });
+          } catch {
+            if (currentObservation === observation) {
+              listener({ status: 'error', message: 'Could not check editor access.' });
+            }
+          }
         },
         () => listener({ status: 'error', message: 'Could not restore the sign-in session.' })
       );
+      return () => {
+        observation++;
+        unsubscribe();
+      };
     },
 
     subscribeApplications(listener) {
@@ -137,10 +151,11 @@ export async function createCatalogueEditor(): Promise<CatalogueEditor> {
   };
 }
 
-export function isCatalogueEditor(email: string | null, emailVerified: boolean): boolean {
-  return emailVerified
-    && email !== null
-    && CATALOGUE_EDITOR_EMAILS.includes(email as typeof CATALOGUE_EDITOR_EMAILS[number]);
+export function isCatalogueEditorProfile(value: unknown): boolean {
+  return typeof value === 'object'
+    && value !== null
+    && 'catalogueEditor' in value
+    && value.catalogueEditor === true;
 }
 
 export function validateDraft(draft: ApplicationDraft): ApplicationDraft {

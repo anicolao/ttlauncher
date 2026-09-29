@@ -127,4 +127,4 @@ jobs:
           --repo "$GITHUB_REPOSITORY"
           --edit-last
           --create-if-none
-          --body "Interactive launcher preview: [$PREVIEW_URL]($PREVIEW_URL) · data mode: live · existing LauncherUI Applications catalogue · anonymous launcher auth · editor writes restricted by Firestore Rules to the approved Google accounts"
+          --body "Interactive launcher preview: [$PREVIEW_URL]($PREVIEW_URL) · data mode: live · existing LauncherUI Applications catalogue · anonymous launcher auth · editor writes restricted by Firestore Rules to approved users/{uid} records"

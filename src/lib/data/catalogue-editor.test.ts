@@ -1,14 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { isCatalogueEditor, validateDraft } from './catalogue-editor';
+import { isCatalogueEditorProfile, validateDraft } from './catalogue-editor';
 
 describe('catalogue editor input', () => {
-  it('recognizes only the two verified editor email addresses', () => {
-    expect(isCatalogueEditor('anicolao@gmail.com', true)).toBe(true);
-    expect(isCatalogueEditor('egirard@gmail.com', true)).toBe(true);
-    expect(isCatalogueEditor('EGIRARD@GMAIL.COM', true)).toBe(false);
-    expect(isCatalogueEditor('anicolao@gmail.com', false)).toBe(false);
-    expect(isCatalogueEditor('visitor@example.test', true)).toBe(false);
-    expect(isCatalogueEditor(null, true)).toBe(false);
+  it('recognizes only an explicit catalogue editor user field', () => {
+    expect(isCatalogueEditorProfile({ catalogueEditor: true })).toBe(true);
+    expect(isCatalogueEditorProfile({ catalogueEditor: false })).toBe(false);
+    expect(isCatalogueEditorProfile({ catalogueEditor: 'true' })).toBe(false);
+    expect(isCatalogueEditorProfile({ email: 'anicolao@gmail.com' })).toBe(false);
+    expect(isCatalogueEditorProfile(null)).toBe(false);
   });
 
   it('normalizes a title, HTTPS URL, and optional icon', () => {

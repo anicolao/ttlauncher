@@ -18,8 +18,8 @@ games through the right-side radial wiper in either direction, tap the logo to a
 the next eight-game boundary, and exercise the real launch URLs.
 Tabletop authentication is anonymous and silent. The editor write path is
 enabled for full acceptance testing at `/edit`; Firestore Rules permit writes
-only for `anicolao@gmail.com` and `egirard@gmail.com`. Those writes update the
-shared live catalogue immediately.
+only for signed-in users whose `users/{uid}` record has `catalogueEditor: true`.
+Those writes update the shared live catalogue immediately.
 
 ## Application preview modes
 
@@ -56,8 +56,9 @@ smoke checks verify:
 - Do not give previews service-account keys or Firebase Admin access.
 - Only review same-repository preview code before signing in with an approved
   editor account. Forks validate but do not deploy.
-- Exact verified-email checks in Firebase Rules and authorized origins remain
-  the security boundary; the matching client list is only an early UX gate.
+- The protected `users/{uid}.catalogueEditor` field in Firebase Rules and
+  authorized origins remain the security boundary. Preview code cannot grant
+  itself access.
 
 ## GitHub Pages setup and cleanup
 

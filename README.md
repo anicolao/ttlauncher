@@ -34,7 +34,7 @@ Every change pushed to `main` is deployed after repository validation to:
 
 Approved catalogue administrators can add, edit, show, and hide games at
 `/ttlauncher/edit`. See [authentication](docs/AUTHENTICATION.md#editor-setup)
-for the Firebase setup and exact email allow-list.
+for the Firebase setup and user-record access field.
 
 Every same-repository pull request builds the launcher in live Firebase mode at
 a PR-specific GitHub Pages path and posts the link on the PR. The tabletop route
