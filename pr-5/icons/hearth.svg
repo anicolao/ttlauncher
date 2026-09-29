@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" role="img" aria-label="Hearthland">
+  <path d="m21 67 59-49 59 49v43H21z" fill="#174151" stroke="#67dbe7" stroke-width="5"/>
+  <path d="M58 110V76h44v34" fill="#07141d"/><path d="M69 47h22v20H69z" fill="#ffe45c"/>
+  <path d="M110 29h14v28h-14z" fill="#ff765f"/><path d="M113 27q14-18 18 0-11-6-18 0" fill="#dff9ff" opacity=".7"/>
+</svg>
