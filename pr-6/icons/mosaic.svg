@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" role="img" aria-label="Mosaic">
+  <g transform="translate(80 60)">
+    <path d="M0-51 14-18 0 0-14-18Z" fill="#ffe45c"/><path d="M51 0 18 14 0 0 18-14Z" fill="#67dbe7"/>
+    <path d="M0 51-14 18 0 0 14 18Z" fill="#ff765f"/><path d="M-51 0-18-14 0 0-18 14Z" fill="#9feaf1"/>
+    <path d="M36-36 24-7 0 0 7-24Z" fill="#1d7080"/><path d="M36 36 7 24 0 0 24 7Z" fill="#e5ba4f"/>
+    <path d="M-36 36-24 7 0 0-7 24Z" fill="#3fb8c6"/><path d="M-36-36-7-24 0 0-24-7Z" fill="#d85f4b"/>
+    <circle r="9" fill="#f5fbfc"/>
+  </g>
+</svg>

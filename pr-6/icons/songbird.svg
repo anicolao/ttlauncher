@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" role="img" aria-label="Songbird">
+  <path d="M30 91q38-3 62-29 15-17 38-1-17 6-22 21 13 4 25 17-34 7-61-4-18 11-42-4" fill="#9feaf1"/>
+  <path d="M79 65q-8-31 17-43 2 25 19 38-22-5-36 5" fill="#67dbe7"/>
+  <circle cx="111" cy="67" r="4" fill="#07141d"/><path d="m129 72 21 6-21 7" fill="#ffe45c"/>
+  <path d="M23 105q53-8 111 2" fill="none" stroke="#ff765f" stroke-width="6" stroke-linecap="round"/>
+</svg>

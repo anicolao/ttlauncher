@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" role="img" aria-label="Forest light">
+  <circle cx="82" cy="48" r="27" fill="#ffe45c" opacity=".35"/>
+  <path d="M80 15 56 57h15L48 96h64L89 57h16z" fill="#67dbe7"/>
+  <path d="M28 47 10 78h12L8 104h43L36 78h10zm104 0-18 31h12l-14 26h43l-15-26h10z" fill="#1d7080"/>
+  <path d="M77 72h8v35h-8z" fill="#ff765f"/>
+</svg>
