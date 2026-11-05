@@ -20,6 +20,9 @@
   let title = '';
   let url = '';
   let icon = '';
+  let tabletop = true;
+  let gameroomEnabled = false;
+  let webUrl = '';
   let adding = false;
   let addMessage = '';
 
@@ -78,10 +81,13 @@
     adding = true;
     addMessage = '';
     try {
-      await editor.addApplication({ title, url, icon });
+      await editor.addApplication({ title, url, icon, hidden: !tabletop, webUrl, gameroomEnabled });
       title = '';
       url = '';
       icon = '';
+      webUrl = '';
+      tabletop = true;
+      gameroomEnabled = false;
       addMessage = 'Game added to the catalogue.';
     } catch (error) {
       addMessage = error instanceof Error ? error.message : 'Could not add the game.';
@@ -153,13 +159,13 @@
     </section>
   {:else if session.status === 'authorized'}
     <aside class="live-notice" aria-label="Live catalogue notice">
-      Changes save to the shared LauncherUI catalogue and appear in the launcher immediately.
+      Changes save to the shared LauncherUI catalogue and appear in the selected launchers immediately.
     </aside>
     <section class="new-game" aria-labelledby="new-game-title">
       <div>
         <p class="eyebrow">New catalogue entry</p>
         <h2 id="new-game-title">Add a game</h2>
-        <p>Title and launch URL are required. New entries appear immediately unless you hide them below.</p>
+        <p>Choose where the game appears and supply the corresponding HTTPS URL.</p>
       </div>
       <form on:submit|preventDefault={addApplication}>
         <label>
@@ -167,9 +173,16 @@
           <input bind:value={title} maxlength="120" required autocomplete="off" placeholder="Snappy Maria" />
         </label>
         <label>
-          Launch URL
-          <input bind:value={url} type="url" pattern="https://.*" required inputmode="url" placeholder="https://games.example.com/" />
+          Launch URL (tabletop)
+          <input bind:value={url} type="url" pattern="https://.*" required={tabletop} inputmode="url" placeholder="https://games.example.com/" />
         </label>
+        <label>
+          WebURL (Gameroom)
+          <input bind:value={webUrl} type="url" pattern="https://.*" required={gameroomEnabled} inputmode="url" />
+        </label>
+        <label class="audience"><input type="checkbox" bind:checked={tabletop} /> Tabletop</label>
+        <label class="audience"><input type="checkbox" bind:checked={gameroomEnabled} /> Gameroom</label>
+
         <label>
           Icon URL <span>(optional)</span>
           <input bind:value={icon} type="text" inputmode="url" placeholder="https://…/icon.png or /icons/game.svg" />
@@ -196,7 +209,7 @@
         <p class="error" role="alert">{catalogue.message}</p>
       {:else}
         <div class="application-grid">
-          {#each catalogue.applications as application (`${application.id}:${application.title}:${application.url}:${application.icon}:${application.hidden}`)}
+          {#each catalogue.applications as application (`${application.id}:${application.title}:${application.url}:${application.icon}:${application.hidden}:${application.webUrl}:${application.gameroomEnabled}`)}
             <ApplicationEditorCard
               {application}
               onSave={saveApplication}
@@ -250,4 +263,6 @@
   @media (forced-colors: active) {
     .gate, .new-game, .catalogue, .identity { border: 2px solid CanvasText; }
   }
+  label.audience { display: flex; align-items: center; gap: .6rem; }
+  label.audience input { min-height: 1.5rem; width: 1.5rem; padding: 0; }
 </style>

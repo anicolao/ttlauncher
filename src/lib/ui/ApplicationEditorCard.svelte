@@ -8,6 +8,9 @@
   let title = application.title;
   let url = application.url;
   let icon = application.icon;
+  let tabletop = !application.hidden;
+  let gameroomEnabled = application.gameroomEnabled;
+  let webUrl = application.webUrl;
   let saving = false;
   let message = '';
 
@@ -15,7 +18,7 @@
     saving = true;
     message = '';
     try {
-      await onSave(application.id, { title, url, icon });
+      await onSave(application.id, { title, url, icon, hidden: !tabletop, webUrl, gameroomEnabled });
       message = 'Saved';
     } catch (error) {
       message = error instanceof Error ? error.message : 'Could not save this game.';
@@ -44,7 +47,7 @@
       <h2>{application.title || 'Untitled application'}</h2>
     </div>
     <span class:off={application.hidden} class="visibility">
-      {application.hidden ? 'Hidden' : 'Visible'}
+      {[!application.hidden ? 'Tabletop' : '', application.gameroomEnabled ? 'Gameroom' : ''].filter(Boolean).join(' · ') || 'Disabled'}
     </span>
   </header>
 
@@ -54,9 +57,16 @@
       <input bind:value={title} maxlength="120" required autocomplete="off" />
     </label>
     <label>
-      Launch URL
-      <input bind:value={url} type="url" pattern="https://.*" required inputmode="url" />
+      Launch URL (tabletop)
+      <input bind:value={url} type="url" pattern="https://.*" required={tabletop} inputmode="url" />
     </label>
+    <label>
+      WebURL (Gameroom)
+      <input bind:value={webUrl} type="url" pattern="https://.*" required={gameroomEnabled} inputmode="url" />
+    </label>
+    <label class="audience"><input type="checkbox" bind:checked={tabletop} /> Tabletop</label>
+    <label class="audience"><input type="checkbox" bind:checked={gameroomEnabled} /> Gameroom</label>
+
     <label>
       Icon URL <span>(optional)</span>
       <input bind:value={icon} type="text" inputmode="url" />
@@ -64,7 +74,7 @@
     <div class="actions">
       <button class="save" type="submit" disabled={saving}>Save changes</button>
       <button class="visibility-toggle" type="button" disabled={saving} on:click={toggleHidden}>
-        {application.hidden ? 'Show on launcher' : 'Hide from launcher'}
+        {application.hidden ? 'Show on tabletop' : 'Hide from tabletop'}
       </button>
       <output aria-live="polite">{message}</output>
     </div>
@@ -104,4 +114,6 @@
   .save { border: 1px solid #075f6b; color: #fff; background: #075f6b; }
   .visibility-toggle { border: 1px solid #9a5e19; color: #693b08; background: #fff4d2; }
   output { color: #7b2b24; font-weight: 700; }
+  label.audience { display: flex; align-items: center; gap: .6rem; }
+  label.audience input { min-height: 1.5rem; width: 1.5rem; padding: 0; }
 </style>

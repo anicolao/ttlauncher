@@ -26,9 +26,14 @@ export interface EditableApplication {
   url: string;
   icon: string;
   hidden: boolean;
+  webUrl: string;
+  gameroomEnabled: boolean;
 }
 
 export interface ApplicationDraft {
+  hidden?: boolean;
+  webUrl?: string;
+  gameroomEnabled?: boolean;
   title: string;
   url: string;
   icon: string;
@@ -132,7 +137,9 @@ export async function createCatalogueEditor(): Promise<CatalogueEditor> {
         Title: normalized.title,
         URL: normalized.url,
         ...(normalized.icon ? { Icon: normalized.icon } : {}),
-        Hidden: false
+        Hidden: normalized.hidden,
+        WebURL: normalized.webUrl,
+        GameroomEnabled: normalized.gameroomEnabled
       });
     },
 
@@ -141,7 +148,10 @@ export async function createCatalogueEditor(): Promise<CatalogueEditor> {
       await updateDoc(doc(applications, id), {
         Title: normalized.title,
         URL: normalized.url,
-        Icon: normalized.icon || deleteField()
+        Icon: normalized.icon || deleteField(),
+        Hidden: normalized.hidden,
+        WebURL: normalized.webUrl,
+        GameroomEnabled: normalized.gameroomEnabled
       });
     },
 
@@ -163,8 +173,12 @@ export function validateDraft(draft: ApplicationDraft): ApplicationDraft {
   if (!title) throw new Error('Enter a title.');
   if (title.length > 120) throw new Error('Keep the title to 120 characters or fewer.');
 
-  const url = parseHttpsUrl(draft.url);
-  if (!url) throw new Error('Enter a valid HTTPS launch URL without credentials.');
+  const hidden = draft.hidden === true;
+  const gameroomEnabled = draft.gameroomEnabled === true;
+  const url = draft.url.trim() ? parseHttpsUrl(draft.url) : '';
+  if (url === null || (!hidden && !url)) throw new Error('Enter a valid HTTPS launch URL without credentials.');
+  const webUrl = draft.webUrl?.trim() ? parseHttpsUrl(draft.webUrl) : '';
+  if (webUrl === null || (gameroomEnabled && !webUrl)) throw new Error('Enter a valid HTTPS WebURL without credentials for Gameroom.');
 
   const rawIcon = draft.icon.trim();
   let icon = '';
@@ -176,7 +190,7 @@ export function validateDraft(draft: ApplicationDraft): ApplicationDraft {
     icon = parsedIcon;
   }
 
-  return { title, url, icon };
+  return { title, url, icon, hidden, webUrl, gameroomEnabled };
 }
 
 function toEditableApplication(id: string, value: DocumentData): EditableApplication {
@@ -185,6 +199,8 @@ function toEditableApplication(id: string, value: DocumentData): EditableApplica
     title: typeof value.Title === 'string' ? value.Title : '',
     url: typeof value.URL === 'string' ? value.URL : '',
     icon: typeof value.Icon === 'string' ? value.Icon : '',
+    webUrl: typeof value.WebURL === 'string' ? value.WebURL : '',
+    gameroomEnabled: value.GameroomEnabled === true,
     hidden: value.Hidden === true
   };
 }
