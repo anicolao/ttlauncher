@@ -64,6 +64,18 @@ describe('catalogue rules', () => {
     await assertSucceeds(updateDoc(application, { Title: 'Snappy Maria Debug' }));
   });
 
+  it('supports independent audiences and rejects missing or unsafe audience URLs', async () => {
+    const db = environment.authenticatedContext('catalogue-editor').firestore();
+    const game = doc(db, 'Applications', 'cribbage');
+    await assertSucceeds(setDoc(game, {Title:'Cribbage',Hidden:true,GameroomEnabled:true,WebURL:'https://anicolao.github.io/cribbage/'}));
+    await assertFails(updateDoc(game, {Hidden:false}));
+    await assertSucceeds(updateDoc(game, {URL:'https://table.example/cribbage',Hidden:false}));
+    await assertSucceeds(updateDoc(game, {GameroomEnabled:false}));
+    await assertFails(updateDoc(game, {WebURL:'javascript:alert(1)'}));
+    await assertFails(setDoc(doc(db,'Applications','missing-web'), {Title:'Missing',Hidden:true,GameroomEnabled:true}));
+    await assertFails(updateDoc(game, {GameroomEnabled:'true'}));
+  });
+
   it('allows a second user whose profile grants editor access', async () => {
     const db = environment.authenticatedContext('second-editor', {
       email: 'eugene.girard@gmail.com'

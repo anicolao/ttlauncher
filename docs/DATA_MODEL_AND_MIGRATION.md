@@ -124,3 +124,12 @@ Any further catalogue metadata, personalization, or launch parameters change the
 product contract and require another ADR, schema/rules design, omnidirectional
 UX review, and explicit user approval. They must not slip into a tile as
 “optional” fields.
+
+## Independent Gameroom selection
+
+See ADR 0006. Hidden applies only to tabletop. GameroomEnabled is an optional
+boolean, default false; WebURL is the independent HTTPS browser target. The
+editor validates URL for tabletop when enabled, WebURL for Gameroom when enabled,
+and any nonempty stored URL. Neither client falls back to the other's URL.
+No existing records are migrated. A tabletop-hidden record can be enabled for
+Gameroom. The normalized tabletop GameTile remains unchanged.

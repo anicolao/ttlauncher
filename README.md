@@ -60,3 +60,8 @@ npm run test:e2e
 - Preview data: existing LauncherUI Firebase catalogue through anonymous auth;
   validation and E2E remain deterministic and emulator-only
 - License: [GNU GPL version 3](LICENSE)
+
+The catalogue editor selects Tabletop and Gameroom independently. Tabletop uses
+`URL` and the existing inverse `Hidden` flag; Gameroom uses `WebURL` and an opt-in
+`GameroomEnabled` flag. Existing records remain tabletop-only. See
+[the shared catalogue decision](docs/adr/0006-shared-gameroom-catalogue.md).

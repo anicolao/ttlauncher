@@ -61,3 +61,9 @@ These rules apply to every change in this repository.
   the full `verify:change` command described in `E2E_GUIDE.md`.
 - PR descriptions state preview data mode and include the north/east/south/west
   touch evidence affected by the change.
+
+The shared catalogue also supports Gameroom (ADR 0006). Hidden is tabletop only;
+GameroomEnabled is an explicit opt-in. Keep URL and WebURL independent, with no
+fallback. The editor may modify both without expanding GameTile. Production
+launcherui also hosts Gameroom rooms: merge catalogue rule changes into the
+reviewed combined rules rather than overwriting unrelated permissions.
