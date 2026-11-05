@@ -49,3 +49,6 @@ link, sign-in prompt, profile, or editor controls.
 - Approved edits made from a PR preview affect the live shared catalogue.
 - Existing application documents require no migration and remain visible.
 - Rollback can remove the editor while harmless `Hidden: false` values remain.
+
+ADR 0006 extends the editable storage fields to WebURL and GameroomEnabled.
+Hidden now explicitly means tabletop visibility; both audiences are independent.

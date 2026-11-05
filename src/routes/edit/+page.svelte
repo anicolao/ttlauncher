@@ -165,22 +165,22 @@
       <form on:submit|preventDefault={addApplication}>
         <label>
           Title
-          <input bind:value={title} maxlength="120" required autocomplete="off" placeholder="Snappy Maria" />
+          <input disabled={adding} bind:value={title} maxlength="120" required autocomplete="off" placeholder="Snappy Maria" />
         </label>
         <label>
           Launch URL (tabletop)
-          <input bind:value={url} type="url" pattern="https://.*" required={tabletop} inputmode="url" placeholder="https://games.example.com/" />
+          <input disabled={adding} bind:value={url} type="url" pattern="https://.*" required={tabletop} inputmode="url" placeholder="https://games.example.com/" />
         </label>
         <label>
           WebURL (Gameroom)
-          <input bind:value={webUrl} type="url" pattern="https://.*" required={gameroomEnabled} inputmode="url" />
+          <input disabled={adding} bind:value={webUrl} type="url" pattern="https://.*" required={gameroomEnabled} inputmode="url" />
         </label>
-        <label class="audience"><input type="checkbox" bind:checked={tabletop} /> Tabletop</label>
-        <label class="audience"><input type="checkbox" bind:checked={gameroomEnabled} /> Gameroom</label>
+        <label class="audience"><input disabled={adding} type="checkbox" bind:checked={tabletop} /> Tabletop</label>
+        <label class="audience"><input disabled={adding} type="checkbox" bind:checked={gameroomEnabled} /> Gameroom</label>
 
         <label>
           Icon URL <span>(optional)</span>
-          <input bind:value={icon} type="text" inputmode="url" placeholder="https://…/icon.png or /icons/game.svg" />
+          <input disabled={adding} bind:value={icon} type="text" inputmode="url" placeholder="https://…/icon.png or /icons/game.svg" />
         </label>
         <button class="primary" type="submit" disabled={adding}>Add game</button>
         <output aria-live="polite">{addMessage}</output>

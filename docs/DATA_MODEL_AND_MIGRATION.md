@@ -25,11 +25,13 @@ interface LegacyApplication {
   URL?: unknown;
   Icon?: unknown;
   Hidden?: unknown;
+  WebURL?: unknown;
+  GameroomEnabled?: unknown;
 }
 ```
 
-That is the entire launcher data model. The new client reads those fields
-unchanged through one adapter:
+These shared storage fields do not expand the tabletop tile model. The tabletop
+adapter continues reading Title, URL, Icon and Hidden:
 
 ```ts
 interface GameTile {

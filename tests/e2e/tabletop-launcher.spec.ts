@@ -240,6 +240,8 @@ test('a user granted editor access adds a game and toggles its launcher visibili
   await expect(addedCard).toHaveCount(1);
   await expect(addedCard.locator('.visibility').filter({hasText:'Tabletop'})).toBeVisible();
 
+  await expect(addForm.getByText('Game added to the catalogue.', {exact:true})).toBeVisible();
+  await expect(addForm.getByLabel('Title', {exact:true})).toHaveValue('');
   await addForm.getByLabel('Title', {exact:true}).fill('Cribbage Web Only');
   await addForm.getByLabel('Tabletop', {exact:true}).uncheck();
   await addForm.getByLabel('Gameroom', {exact:true}).check();

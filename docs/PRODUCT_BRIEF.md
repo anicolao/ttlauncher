@@ -63,7 +63,8 @@ layout, account management, personal history, or preferred viewing direction.
 - Game details, description, player count, duration, genre, or cover metadata
 - Player/setup controls, launch confirmation, or settings of any kind
 - Hosting or embedding games; each target URL owns the post-tap experience
-- Bulk migration or game metadata beyond the storage-only `Hidden` flag
+- Bulk migration or gameplay metadata (shared audience flags and WebURL are
+  supported by ADR 0006)
 
 ## Success measures
 

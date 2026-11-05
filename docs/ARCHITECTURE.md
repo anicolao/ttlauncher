@@ -30,7 +30,8 @@ existing LauncherUI Firebase project
 ```
 
 Only data adapters import Firebase. Only catalogue adapters know `Applications`,
-`Title`, `URL`, `Icon`, and the storage-only `Hidden` flag. Only the launch policy
+`Title`, `URL`, `WebURL`, `Icon`, and storage-only audience flags `Hidden` and
+`GameroomEnabled` (ADR 0006). Only the launch policy
 may turn a validated URL into navigation.
 
 ## Implemented source layout
