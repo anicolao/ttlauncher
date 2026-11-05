@@ -259,8 +259,18 @@ test('a user granted editor access adds a game and toggles its launcher visibili
   await page.goto('/edit/');
   await expect(editorSurface).toHaveAttribute('data-status', 'ready');
   const visibleCard = page.locator('[data-application-id]').filter({ hasText: 'Aardvark Added' });
-  await visibleCard.getByRole('button', { name: 'Hide from tabletop' }).click();
-  await expect(visibleCard.locator('.visibility').filter({hasText:'Disabled'})).toBeVisible();
+  await visibleCard.getByLabel('WebURL (Gameroom)').fill('https://web.example.test/aardvark');
+  await visibleCard.getByLabel('Gameroom', {exact:true}).check();
+  await visibleCard.getByRole('button', {name:'Save changes'}).click();
+  await expect(visibleCard.locator('.visibility')).toHaveText('Tabletop · Gameroom');
+  await visibleCard.getByLabel('Tabletop', {exact:true}).uncheck();
+  await visibleCard.getByRole('button', {name:'Save changes'}).click();
+  await steps.step('independent-audiences-saved', {surface:editorSurface,status:'ready',tabletopGeometry:false,verifications:[
+    () => expect(visibleCard.locator('.visibility')).toHaveText('Gameroom'),
+    () => expect(visibleCard.getByLabel('Gameroom', {exact:true})).toBeChecked(),
+    () => expect(visibleCard.getByLabel('Launch URL (tabletop)')).toHaveValue('https://games.example.test/aardvark-added'),
+    () => expect(visibleCard.getByLabel('WebURL (Gameroom)')).toHaveValue('https://web.example.test/aardvark')
+  ]});
 
   await page.getByRole('link', { name: 'Table Top Launcher' }).click();
   await expect(page.locator('[data-e2e-layout]')).toHaveAttribute('data-status', 'current');

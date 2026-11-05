@@ -101,11 +101,6 @@
     await editor.updateApplication(id, draft);
   }
 
-  async function toggleApplication(id: string, hidden: boolean) {
-    if (!editor) throw new Error('Editor unavailable.');
-    await editor.setApplicationHidden(id, hidden);
-  }
-
 </script>
 
 <svelte:head>
@@ -199,7 +194,7 @@
           <h2 id="catalogue-title">Games</h2>
         </div>
         {#if catalogue.status === 'ready'}
-          <p>{catalogue.applications.length} total · {catalogue.applications.filter((item) => item.hidden).length} hidden</p>
+          <p>{catalogue.applications.length} total · {catalogue.applications.filter((item) => !item.hidden).length} tabletop · {catalogue.applications.filter((item) => item.gameroomEnabled).length} Gameroom</p>
         {/if}
       </div>
 
@@ -213,7 +208,6 @@
             <ApplicationEditorCard
               {application}
               onSave={saveApplication}
-              onToggleHidden={toggleApplication}
             />
           {/each}
         </div>

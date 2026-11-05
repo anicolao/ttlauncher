@@ -3,7 +3,6 @@
 
   export let application: EditableApplication;
   export let onSave: (id: string, draft: ApplicationDraft) => Promise<void>;
-  export let onToggleHidden: (id: string, hidden: boolean) => Promise<void>;
 
   let title = application.title;
   let url = application.url;
@@ -27,26 +26,15 @@
     }
   }
 
-  async function toggleHidden() {
-    saving = true;
-    message = '';
-    try {
-      await onToggleHidden(application.id, !application.hidden);
-    } catch (error) {
-      message = error instanceof Error ? error.message : 'Could not change visibility.';
-    } finally {
-      saving = false;
-    }
-  }
 </script>
 
-<article class:hidden={application.hidden} data-application-id={application.id}>
+<article class:hidden={application.hidden && !application.gameroomEnabled} data-application-id={application.id}>
   <header>
     <div>
       <p class="document-id">{application.id}</p>
       <h2>{application.title || 'Untitled application'}</h2>
     </div>
-    <span class:off={application.hidden} class="visibility">
+    <span class:off={application.hidden && !application.gameroomEnabled} class="visibility">
       {[!application.hidden ? 'Tabletop' : '', application.gameroomEnabled ? 'Gameroom' : ''].filter(Boolean).join(' · ') || 'Disabled'}
     </span>
   </header>
@@ -73,9 +61,6 @@
     </label>
     <div class="actions">
       <button class="save" type="submit" disabled={saving}>Save changes</button>
-      <button class="visibility-toggle" type="button" disabled={saving} on:click={toggleHidden}>
-        {application.hidden ? 'Show on tabletop' : 'Hide from tabletop'}
-      </button>
       <output aria-live="polite">{message}</output>
     </div>
   </form>
@@ -112,7 +97,6 @@
   button { min-height: 3rem; border-radius: .65rem; padding: .65rem 1rem; font: inherit; font-weight: 700; cursor: pointer; }
   button:disabled { cursor: wait; opacity: .55; }
   .save { border: 1px solid #075f6b; color: #fff; background: #075f6b; }
-  .visibility-toggle { border: 1px solid #9a5e19; color: #693b08; background: #fff4d2; }
   output { color: #7b2b24; font-weight: 700; }
   label.audience { display: flex; align-items: center; gap: .6rem; }
   label.audience input { min-height: 1.5rem; width: 1.5rem; padding: 0; }

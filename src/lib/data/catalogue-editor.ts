@@ -58,7 +58,6 @@ export interface CatalogueEditor {
   signOut(): Promise<void>;
   addApplication(draft: ApplicationDraft): Promise<void>;
   updateApplication(id: string, draft: ApplicationDraft): Promise<void>;
-  setApplicationHidden(id: string, hidden: boolean): Promise<void>;
 }
 
 export async function createCatalogueEditor(): Promise<CatalogueEditor> {
@@ -153,10 +152,6 @@ export async function createCatalogueEditor(): Promise<CatalogueEditor> {
         WebURL: normalized.webUrl,
         GameroomEnabled: normalized.gameroomEnabled
       });
-    },
-
-    async setApplicationHidden(id, hidden) {
-      await updateDoc(doc(applications, id), { Hidden: hidden });
     }
   };
 }
