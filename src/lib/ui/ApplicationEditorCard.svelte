@@ -42,22 +42,22 @@
   <form on:submit|preventDefault={save}>
     <label>
       Title
-      <input bind:value={title} maxlength="120" required autocomplete="off" />
+      <input disabled={saving} bind:value={title} maxlength="120" required autocomplete="off" />
     </label>
     <label>
       Launch URL (tabletop)
-      <input bind:value={url} type="url" pattern="https://.*" required={tabletop} inputmode="url" />
+      <input disabled={saving} bind:value={url} type="url" pattern="https://.*" required={tabletop} inputmode="url" />
     </label>
     <label>
       WebURL (Gameroom)
-      <input bind:value={webUrl} type="url" pattern="https://.*" required={gameroomEnabled} inputmode="url" />
+      <input disabled={saving} bind:value={webUrl} type="url" pattern="https://.*" required={gameroomEnabled} inputmode="url" />
     </label>
-    <label class="audience"><input type="checkbox" bind:checked={tabletop} /> Tabletop</label>
-    <label class="audience"><input type="checkbox" bind:checked={gameroomEnabled} /> Gameroom</label>
+    <label class="audience"><input disabled={saving} type="checkbox" bind:checked={tabletop} /> Tabletop</label>
+    <label class="audience"><input disabled={saving} type="checkbox" bind:checked={gameroomEnabled} /> Gameroom</label>
 
     <label>
       Icon URL <span>(optional)</span>
-      <input bind:value={icon} type="text" inputmode="url" />
+      <input disabled={saving} bind:value={icon} type="text" inputmode="url" />
     </label>
     <div class="actions">
       <button class="save" type="submit" disabled={saving}>Save changes</button>
