@@ -20,6 +20,7 @@ import {
 import { parseHttpsUrl, parseIconUrl } from '$lib/domain/game-tile';
 import { getFirebaseServices } from './firebase-client';
 
+export type GameroomMode = 'disabled' | 'integrated' | 'new-tab';
 export interface EditableApplication {
   id: string;
   title: string;
@@ -27,13 +28,13 @@ export interface EditableApplication {
   icon: string;
   hidden: boolean;
   webUrl: string;
-  gameroomEnabled: boolean;
+  gameroomEnabled: GameroomMode;
 }
 
 export interface ApplicationDraft {
   hidden?: boolean;
   webUrl?: string;
-  gameroomEnabled?: boolean;
+  gameroomEnabled?: GameroomMode;
   title: string;
   url: string;
   icon: string;
@@ -169,11 +170,12 @@ export function validateDraft(draft: ApplicationDraft): ApplicationDraft {
   if (title.length > 120) throw new Error('Keep the title to 120 characters or fewer.');
 
   const hidden = draft.hidden === true;
-  const gameroomEnabled = draft.gameroomEnabled === true;
+  const gameroomEnabled = draft.gameroomEnabled ?? 'disabled';
+  if (!['disabled','integrated','new-tab'].includes(gameroomEnabled)) throw new Error('Choose a Gameroom launch mode.');
   const url = draft.url.trim() ? parseHttpsUrl(draft.url) : '';
   if (url === null || (!hidden && !url)) throw new Error('Enter a valid HTTPS launch URL without credentials.');
   const webUrl = draft.webUrl?.trim() ? parseHttpsUrl(draft.webUrl) : '';
-  if (webUrl === null || (gameroomEnabled && !webUrl)) throw new Error('Enter a valid HTTPS WebURL without credentials for Gameroom.');
+  if (webUrl === null || (gameroomEnabled !== 'disabled' && !webUrl)) throw new Error('Enter a valid HTTPS WebURL without credentials for Gameroom.');
 
   const rawIcon = draft.icon.trim();
   let icon = '';
@@ -195,7 +197,7 @@ function toEditableApplication(id: string, value: DocumentData): EditableApplica
     url: typeof value.URL === 'string' ? value.URL : '',
     icon: typeof value.Icon === 'string' ? value.Icon : '',
     webUrl: typeof value.WebURL === 'string' ? value.WebURL : '',
-    gameroomEnabled: value.GameroomEnabled === true,
+    gameroomEnabled: ['integrated','new-tab'].includes(value.GameroomEnabled) ? value.GameroomEnabled : 'disabled',
     hidden: value.Hidden === true
   };
 }
