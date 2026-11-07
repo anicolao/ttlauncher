@@ -67,12 +67,14 @@ describe('catalogue rules', () => {
   it('supports independent audiences and rejects missing or unsafe audience URLs', async () => {
     const db = environment.authenticatedContext('catalogue-editor').firestore();
     const game = doc(db, 'Applications', 'cribbage');
-    await assertSucceeds(setDoc(game, {Title:'Cribbage',Hidden:true,GameroomEnabled:true,WebURL:'https://anicolao.github.io/cribbage/'}));
+    await assertSucceeds(setDoc(game, {Title:'Cribbage',Hidden:true,GameroomEnabled:'integrated',WebURL:'https://anicolao.github.io/cribbage/'}));
     await assertFails(updateDoc(game, {Hidden:false}));
     await assertSucceeds(updateDoc(game, {URL:'https://table.example/cribbage',Hidden:false}));
-    await assertSucceeds(updateDoc(game, {GameroomEnabled:false}));
+    await assertSucceeds(updateDoc(game, {GameroomEnabled:'new-tab'}));
+    await assertSucceeds(updateDoc(game, {GameroomEnabled:'disabled'}));
+    await assertFails(updateDoc(game, {GameroomEnabled:true}));
     await assertFails(updateDoc(game, {WebURL:'javascript:alert(1)'}));
-    await assertFails(setDoc(doc(db,'Applications','missing-web'), {Title:'Missing',Hidden:true,GameroomEnabled:true}));
+    await assertFails(setDoc(doc(db,'Applications','missing-web'), {Title:'Missing',Hidden:true,GameroomEnabled:'integrated'}));
     await assertFails(updateDoc(game, {GameroomEnabled:'true'}));
   });
 

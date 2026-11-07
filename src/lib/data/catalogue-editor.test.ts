@@ -16,7 +16,7 @@ describe('catalogue editor input', () => {
       url: 'https://games.example.test/snappy-maria',
       icon: ' https://images.example.test/snappy-maria.png '
     })).toEqual({
-      hidden: false, webUrl: '', gameroomEnabled: false,
+      hidden: false, webUrl: '', gameroomEnabled: 'disabled',
       title: 'Snappy Maria',
       url: 'https://games.example.test/snappy-maria',
       icon: 'https://images.example.test/snappy-maria.png'
@@ -38,9 +38,10 @@ describe('catalogue editor input', () => {
 
   it('supports Gameroom-only entries and distinct URLs when both are enabled', () => {
     const webUrl = 'https://anicolao.github.io/cribbage/';
-    expect(validateDraft({title:'Cribbage',url:'',icon:'',hidden:true,webUrl,gameroomEnabled:true})).toMatchObject({hidden:true,webUrl,gameroomEnabled:true,url:''});
-    expect(validateDraft({title:'Both',url:'https://table.example/',icon:'',webUrl,gameroomEnabled:true})).toMatchObject({hidden:false,url:'https://table.example/',webUrl});
-    expect(() => validateDraft({title:'Missing web URL',url:'https://table.example/',icon:'',gameroomEnabled:true})).toThrow('WebURL');
+    expect(validateDraft({title:'Independent',url:'',icon:'',hidden:true,webUrl,gameroomEnabled:'new-tab'})).toMatchObject({gameroomEnabled:'new-tab',webUrl});
+    expect(validateDraft({title:'Cribbage',url:'',icon:'',hidden:true,webUrl,gameroomEnabled:'integrated'})).toMatchObject({hidden:true,webUrl,gameroomEnabled:'integrated',url:''});
+    expect(validateDraft({title:'Both',url:'https://table.example/',icon:'',webUrl,gameroomEnabled:'integrated'})).toMatchObject({hidden:false,url:'https://table.example/',webUrl});
+    expect(() => validateDraft({title:'Missing web URL',url:'https://table.example/',icon:'',gameroomEnabled:'integrated'})).toThrow('WebURL');
     expect(() => validateDraft({title:'Unsafe',url:'',icon:'',hidden:true,webUrl:'javascript:alert(1)'})).toThrow('WebURL');
   });
 

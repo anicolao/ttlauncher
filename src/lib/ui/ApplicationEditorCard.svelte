@@ -28,14 +28,14 @@
 
 </script>
 
-<article class:hidden={application.hidden && !application.gameroomEnabled} data-application-id={application.id}>
+<article class:hidden={application.hidden && application.gameroomEnabled === 'disabled'} data-application-id={application.id}>
   <header>
     <div>
       <p class="document-id">{application.id}</p>
       <h2>{application.title || 'Untitled application'}</h2>
     </div>
-    <span class:off={application.hidden && !application.gameroomEnabled} class="visibility">
-      {[!application.hidden ? 'Tabletop' : '', application.gameroomEnabled ? 'Gameroom' : ''].filter(Boolean).join(' · ') || 'Disabled'}
+    <span class:off={application.hidden && application.gameroomEnabled === 'disabled'} class="visibility">
+      {[!application.hidden ? 'Tabletop' : '', application.gameroomEnabled !== 'disabled' ? 'Gameroom' : ''].filter(Boolean).join(' · ') || 'Disabled'}
     </span>
   </header>
 
@@ -50,10 +50,10 @@
     </label>
     <label>
       WebURL (Gameroom)
-      <input disabled={saving} bind:value={webUrl} type="url" pattern="https://.*" required={gameroomEnabled} inputmode="url" />
+      <input disabled={saving} bind:value={webUrl} type="url" pattern="https://.*" required={gameroomEnabled !== 'disabled'} inputmode="url" />
     </label>
     <label class="audience"><input disabled={saving} type="checkbox" bind:checked={tabletop} /> Tabletop</label>
-    <label class="audience"><input disabled={saving} type="checkbox" bind:checked={gameroomEnabled} /> Gameroom</label>
+    <label>Gameroom<select aria-label="Gameroom" disabled={saving} bind:value={gameroomEnabled}><option value="disabled">Disabled</option><option value="integrated">Integrated</option><option value="new-tab">New tab</option></select></label>
 
     <label>
       Icon URL <span>(optional)</span>
@@ -83,7 +83,7 @@
   form { display: grid; gap: .9rem; }
   label { display: grid; gap: .35rem; color: #173c4c; font-weight: 700; }
   label span { color: #647b85; font-weight: 400; }
-  input {
+  input, select {
     min-height: 3rem;
     border: 1px solid #8ba8b4;
     border-radius: .6rem;
@@ -92,7 +92,7 @@
     background: #fff;
     font: inherit;
   }
-  input:focus-visible, button:focus-visible { outline: .2rem solid #087e8b; outline-offset: .15rem; }
+  input:focus-visible, select:focus-visible, button:focus-visible { outline: .2rem solid #087e8b; outline-offset: .15rem; }
   .actions { display: flex; flex-wrap: wrap; align-items: center; gap: .7rem; margin-top: .2rem; }
   button { min-height: 3rem; border-radius: .65rem; padding: .65rem 1rem; font: inherit; font-weight: 700; cursor: pointer; }
   button:disabled { cursor: wait; opacity: .55; }

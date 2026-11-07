@@ -23,8 +23,8 @@ service cloud.firestore {
           || request.resource.data.get('URL', '').matches('^https://[^@\\s]+$'))
         && (!('WebURL' in request.resource.data) || (request.resource.data.WebURL is string
           && (request.resource.data.WebURL == '' || request.resource.data.WebURL.matches('^https://[^@\\s]+$'))))
-        && (!('GameroomEnabled' in request.resource.data) || request.resource.data.GameroomEnabled is bool)
-        && (request.resource.data.get('GameroomEnabled', false) == false
+        && (!('GameroomEnabled' in request.resource.data) || request.resource.data.GameroomEnabled in ['disabled','integrated','new-tab'])
+        && (request.resource.data.get('GameroomEnabled', 'disabled') == 'disabled'
           || request.resource.data.get('WebURL', '').matches('^https://[^@\\s]+$'))
         && (!('Icon' in request.resource.data) || request.resource.data.Icon is string)
         && (!('Hidden' in request.resource.data) || request.resource.data.Hidden is bool);

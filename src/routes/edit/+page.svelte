@@ -21,7 +21,7 @@
   let url = '';
   let icon = '';
   let tabletop = true;
-  let gameroomEnabled = false;
+  let gameroomEnabled: import('$lib/data/catalogue-editor').GameroomMode = 'disabled';
   let webUrl = '';
   let adding = false;
   let addMessage = '';
@@ -87,7 +87,7 @@
       icon = '';
       webUrl = '';
       tabletop = true;
-      gameroomEnabled = false;
+      gameroomEnabled = 'disabled';
       addMessage = 'Game added to the catalogue.';
     } catch (error) {
       addMessage = error instanceof Error ? error.message : 'Could not add the game.';
@@ -173,10 +173,10 @@
         </label>
         <label>
           WebURL (Gameroom)
-          <input disabled={adding} bind:value={webUrl} type="url" pattern="https://.*" required={gameroomEnabled} inputmode="url" />
+          <input disabled={adding} bind:value={webUrl} type="url" pattern="https://.*" required={gameroomEnabled !== 'disabled'} inputmode="url" />
         </label>
         <label class="audience"><input disabled={adding} type="checkbox" bind:checked={tabletop} /> Tabletop</label>
-        <label class="audience"><input disabled={adding} type="checkbox" bind:checked={gameroomEnabled} /> Gameroom</label>
+        <label>Gameroom<select aria-label="Gameroom" disabled={adding} bind:value={gameroomEnabled}><option value="disabled">Disabled</option><option value="integrated">Integrated</option><option value="new-tab">New tab</option></select></label>
 
         <label>
           Icon URL <span>(optional)</span>
@@ -194,7 +194,7 @@
           <h2 id="catalogue-title">Games</h2>
         </div>
         {#if catalogue.status === 'ready'}
-          <p>{catalogue.applications.length} total · {catalogue.applications.filter((item) => !item.hidden).length} tabletop · {catalogue.applications.filter((item) => item.gameroomEnabled).length} Gameroom</p>
+          <p>{catalogue.applications.length} total · {catalogue.applications.filter((item) => !item.hidden).length} tabletop · {catalogue.applications.filter((item) => item.gameroomEnabled !== 'disabled').length} Gameroom</p>
         {/if}
       </div>
 
@@ -236,7 +236,7 @@
   .gate-actions { display: flex; gap: .7rem; }
   .primary { min-height: 3.2rem; border: 0; border-radius: .7rem; padding: .7rem 1.25rem; color: #fff; background: #076673; font: inherit; font-weight: 700; cursor: pointer; }
   .primary:disabled { cursor: wait; opacity: .55; }
-  button:focus-visible, input:focus-visible, a:focus-visible { outline: .2rem solid #087e8b; outline-offset: .18rem; }
+  button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible { outline: .2rem solid #087e8b; outline-offset: .18rem; }
   output { min-height: 1.4em; color: #862e26; font-weight: 700; }
   .live-notice { max-width: 100rem; margin: 0 auto 1rem; border: 1px solid #b47b16; border-radius: .8rem; padding: .8rem 1rem; color: #633c00; background: #fff2c9; font-weight: 700; }
   .new-game { display: grid; grid-template-columns: minmax(16rem, .7fr) minmax(34rem, 1.3fr); gap: clamp(2rem, 4vw, 5rem); margin-bottom: 2rem; }
@@ -246,7 +246,7 @@
   .new-game label { display: grid; gap: .35rem; color: #173c4c; font-weight: 700; }
   .new-game label:first-child { grid-column: 1 / -1; }
   .new-game label span { color: #647b85; font-weight: 400; }
-  .new-game input { min-height: 3rem; border: 1px solid #8ba8b4; border-radius: .6rem; padding: 0 .8rem; font: inherit; }
+  .new-game input, .new-game select { min-height: 3rem; border: 1px solid #8ba8b4; border-radius: .6rem; padding: 0 .8rem; font: inherit; }
   .new-game output { align-self: center; }
   .catalogue { background: rgba(247, 251, 252, .95); }
   .section-heading { display: flex; align-items: end; justify-content: space-between; gap: 2rem; margin-bottom: 1.4rem; }
