@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" role="img" aria-label="Star charts">
+  <g fill="#ffe45c"><path d="m80 11 6 19 19 6-19 6-6 19-6-19-19-6 19-6z"/><path d="m126 44 4 12 12 4-12 4-4 12-4-12-12-4 12-4z"/><circle cx="28" cy="72" r="5"/></g>
+  <path d="M25 73 80 36l46 24M80 36l-7 65m53-41-53 41-48-28" fill="none" stroke="#67dbe7" stroke-width="3" opacity=".75"/>
+  <circle cx="73" cy="101" r="8" fill="#ff765f"/>
+</svg>
