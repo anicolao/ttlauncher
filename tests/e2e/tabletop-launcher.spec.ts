@@ -244,7 +244,7 @@ test('a user granted editor access adds a game and toggles its launcher visibili
   await expect(addForm.getByLabel('Title', {exact:true})).toHaveValue('');
   await addForm.getByLabel('Title', {exact:true}).fill('Cribbage Web Only');
   await addForm.getByLabel('Tabletop', {exact:true}).uncheck();
-  await addForm.getByLabel('Gameroom', {exact:true}).check();
+  await addForm.getByLabel('Gameroom', {exact:true}).selectOption('integrated');
   await addForm.getByLabel('WebURL (Gameroom)').fill('https://anicolao.github.io/cribbage/');
   await addForm.getByRole('button', {name:'Add game',exact:true}).click();
   const webCard = page.locator('[data-application-id]').filter({hasText:'Cribbage Web Only'});
@@ -262,14 +262,14 @@ test('a user granted editor access adds a game and toggles its launcher visibili
   await expect(editorSurface).toHaveAttribute('data-status', 'ready');
   const visibleCard = page.locator('[data-application-id]').filter({ hasText: 'Aardvark Added' });
   await visibleCard.getByLabel('WebURL (Gameroom)').fill('https://web.example.test/aardvark');
-  await visibleCard.getByLabel('Gameroom', {exact:true}).check();
+  await visibleCard.getByLabel('Gameroom', {exact:true}).selectOption('new-tab');
   await visibleCard.getByRole('button', {name:'Save changes'}).click();
   await expect(visibleCard.locator('.visibility')).toHaveText('Tabletop · Gameroom');
   await visibleCard.getByLabel('Tabletop', {exact:true}).uncheck();
   await visibleCard.getByRole('button', {name:'Save changes'}).click();
   await steps.step('independent-audiences-saved', {surface:editorSurface,status:'ready',tabletopGeometry:false,verifications:[
     () => expect(visibleCard.locator('.visibility')).toHaveText('Gameroom'),
-    () => expect(visibleCard.getByLabel('Gameroom', {exact:true})).toBeChecked(),
+    () => expect(visibleCard.getByLabel('Gameroom', {exact:true})).toHaveValue('new-tab'),
     () => expect(visibleCard.getByLabel('Launch URL (tabletop)')).toHaveValue('https://games.example.test/aardvark-added'),
     () => expect(visibleCard.getByLabel('WebURL (Gameroom)')).toHaveValue('https://web.example.test/aardvark')
   ]});

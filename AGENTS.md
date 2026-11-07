@@ -63,7 +63,7 @@ These rules apply to every change in this repository.
   touch evidence affected by the change.
 
 The shared catalogue also supports Gameroom (ADR 0006). Hidden is tabletop only;
-GameroomEnabled is an explicit opt-in. Keep URL and WebURL independent, with no
+GameroomEnabled is disabled, integrated, or new-tab; missing values are disabled. Keep URL and WebURL independent, with no
 fallback. The editor may modify both without expanding GameTile. Production
 launcherui also hosts Gameroom rooms: merge catalogue rule changes into the
 reviewed combined rules rather than overwriting unrelated permissions.
